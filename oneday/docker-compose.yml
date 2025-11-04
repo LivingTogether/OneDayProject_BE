@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: knu-server
+    environment:
+      DB_USERNAME: roknu
+      DB_PW: 1234
+      DB_DATABASE: knuproject
+      DB_PORT: 5432
+      SPRING_PORT: 8080
+
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: "no"
+
+  database:
+
+    image: postgres:16-alpine
+    container_name: knu-database
+
+    environment:
+      POSTGRES_USER: roknu
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: knuproject
+
+    ports:
+    - "5432:5432"
+    restart: "no"
+    volumes:
+      - knu-database:/var/lib/postgresql/data
+      - ./local_config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
+      - ./local_config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U roknu -d knuproject" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  knu-database:
