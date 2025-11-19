@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>환영합니다</title>
+</head>
+<body>
+<h1><span sec:authentication="name">사용자</span>님, 환영합니다!</h1>
+
+<form th:action="@{/logout}" method="post">
+    <button type="submit">로그아웃</button>
+</form>
+</body>
+</html>

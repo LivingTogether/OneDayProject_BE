@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>회원가입</title>
+</head>
+<body>
+<h2>회원가입</h2>
+<form action="/signup" method="post">
+    <div>
+        <label for="userId">사용자 아이디:</label>
+        <input type="text" id="userId" name="userId" required>
+    </div>
+    <div>
+        <label for="password">비밀번호:</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+    <div>
+        <label for="StudentId">학번:</label>
+        <input type="text" id="StudentId" name="StudentId" required>
+    </div>
+    <div>
+        <label for="name">이름:</label>
+        <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+        <label for="major">전공:</label>
+        <input type="text" id="major" name="major" required>
+    </div>
+    <button type="submit">가입하기</button>
+</form>
+</body>
+</html>
