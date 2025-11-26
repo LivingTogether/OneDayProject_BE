@@ -10,9 +10,13 @@
         <module name="oneday.main" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="oneday.test" target="21" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="com.knuaf.oneday.test" options="-parameters" />
       <module name="oneday" options="-parameters" />
       <module name="oneday.main" options="-parameters" />
       <module name="oneday.test" options="-parameters" />

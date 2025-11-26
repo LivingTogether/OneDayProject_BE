@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/OneDayProject_BE.iml" filepath="$PROJECT_DIR$/.idea/OneDayProject_BE.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/oneday.main.iml" filepath="$PROJECT_DIR$/.idea/modules/oneday.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/oneday.test.iml" filepath="$PROJECT_DIR$/.idea/modules/oneday.test.iml" />
     </modules>
   </component>
 </project>
