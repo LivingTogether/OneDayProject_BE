@@ -21,7 +21,7 @@ public class CourseService {
 
     // [등록] registerCourse
     @Transactional
-    public Long registerCourse(String studentId, CourseRegisterDto request) {
+    public Long registerCourse(Long studentId, CourseRegisterDto request) {
 
 
         String tableName = "lecture_list_2025"+request.getSemester();
@@ -49,7 +49,7 @@ public class CourseService {
 
     // [수정] updateCourseGrade
     @Transactional
-    public void updateCourseGrade(String studentId, CourseUpdateDto request) {
+    public void updateCourseGrade(Long studentId, CourseUpdateDto request) {
 
         // ★ 2. 조회할 때 자른 ID 사용
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, request.getLecId())
@@ -60,7 +60,7 @@ public class CourseService {
 
     // [삭제] deleteCourse
     @Transactional
-    public void deleteCourse(String studentId, String rawLecId) {
+    public void deleteCourse(Long studentId, String rawLecId) {
 
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, rawLecId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 수강 내역이 없습니다."));

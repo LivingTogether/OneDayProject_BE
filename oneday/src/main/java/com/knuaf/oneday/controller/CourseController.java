@@ -17,7 +17,7 @@ public class CourseController {
     @PostMapping("/register")
     public ResponseEntity<String> registerCourse(@RequestBody CourseRegisterDto request) {
         // TODO: 실제로는 Security에서 studentId를 꺼내와야 함 (지금은 임시로 넣음)
-        String tempStudentId = "20241234";
+        Long tempStudentId = 20241234L;
 
         courseService.registerCourse(tempStudentId, request);
 
@@ -26,7 +26,7 @@ public class CourseController {
     // 학점 수정 API
     @PutMapping("/update")
     public ResponseEntity<String> updateGrade(@RequestBody CourseUpdateDto request) {
-        String tempStudentId = "20241234"; // ★ 임시 학번
+        Long tempStudentId = 20241234L; // ★ 임시 학번
 
         courseService.updateCourseGrade(tempStudentId, request);
         return ResponseEntity.ok("성적이 수정되었습니다.");
@@ -36,7 +36,7 @@ public class CourseController {
     // URL 예시: DELETE /api/course/COMP2025 (뒤에 강좌번호가 옴)
     @DeleteMapping("/{lecId}")
     public ResponseEntity<String> deleteCourse(@PathVariable String lecId) {
-        String tempStudentId = "20241234"; // ★ 임시 학번
+        Long tempStudentId = 20241234L; // ★ 임시 학번
 
         courseService.deleteCourse(tempStudentId, lecId);
         return ResponseEntity.ok("수강 취소(삭제)가 완료되었습니다.");

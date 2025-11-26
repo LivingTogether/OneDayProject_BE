@@ -16,7 +16,7 @@ public class UserAttend {
     private Long idx;
 
     @Column(name = "student_id")
-    private String studentId; // 누가 들었는지
+    private Long studentId; // 누가 들었는지
 
     // --- 아래는 Lecture에서 복사해올 정보들 ---
     @Column(name = "lec_id")
@@ -28,22 +28,18 @@ public class UserAttend {
     private Integer credit;
 
     @Column(name = "received_grade")
-    private String receivedGrade; // 사용자가 입력한 성적 (A+, B0...)
+    private Float receivedGrade; // 사용자가 입력한 성적 (A+, B0...)
 
     @Column(name = "lec_type")
     private String lecType;
 
-    @Column(name = "open_college")
-    private String openCollege;
-
     @Column(name = "open_depart")
     private String openDepart;
 
-    private String professor;
     private String language;
 
     @Builder
-    public UserAttend(String studentId, Lecture lecture, String receivedGrade) {
+    public UserAttend(Long studentId, Lecture lecture, Float receivedGrade) {
         this.studentId = studentId;
         this.receivedGrade = receivedGrade;
         // Lecture에서 정보 복사
@@ -54,7 +50,7 @@ public class UserAttend {
         this.openDepart = lecture.getOpenDepart();
         this.language = lecture.getLanguage();
     }
-    public void changeGrade(String newGrade) {
+    public void changeGrade(Float newGrade) {
         this.receivedGrade = newGrade;
     }
 }
