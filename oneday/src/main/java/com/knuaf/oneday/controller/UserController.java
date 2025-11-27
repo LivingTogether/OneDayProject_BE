@@ -12,9 +12,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 @Controller
-@CrossOrigin(origins = "http://localhost:8080") // 3000번 포트 허용
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://16.176.198.162:8080") // 3000번 포트 허용
+  
 public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);

@@ -56,6 +56,8 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("신청하지 않은 과목입니다."));
 
         userAttend.changeGrade(request.getGrade());
+        userAttend.changeLecType(request.getLectureType());
+        userAttendRepository.save(userAttend);
     }
 
     // [삭제] deleteCourse

@@ -53,4 +53,7 @@ public class UserAttend {
     public void changeGrade(Float newGrade) {
         this.receivedGrade = newGrade;
     }
+    public void changeLecType(String newLecType) {
+        this.lecType = newLecType;
+    }
 }

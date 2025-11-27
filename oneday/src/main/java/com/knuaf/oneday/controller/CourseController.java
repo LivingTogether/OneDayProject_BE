@@ -2,10 +2,13 @@ package com.knuaf.oneday.controller;
 
 import com.knuaf.oneday.dto.CourseRegisterDto;
 import com.knuaf.oneday.dto.CourseUpdateDto;
+import com.knuaf.oneday.dto.LectureResponseDto;
 import com.knuaf.oneday.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/course")
@@ -41,4 +44,11 @@ public class CourseController {
         courseService.deleteCourse(tempStudentId, lecId);
         return ResponseEntity.ok("수강 취소(삭제)가 완료되었습니다.");
     }
+
+   // @GetMapping("/standard")
+    //public ResponseEntity<List<LectureResponseDto>> getCourse() {
+      //  List<LectureResponseDto> lectures = lectureService.getLectureList(semester, keyword);
+      //  return ResponseEntity.ok(lectures);
+   // }
+
 }
