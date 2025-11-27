@@ -9,7 +9,7 @@
 <div th:if="${param.error}" style="color: red;">
     사용자 이름 또는 비밀번호가 잘못되었습니다.
 </div>
-<form th:action="@{/login}" method="post">
+<form th:action="@{/api/auth/login}" method="post">
     <div>
         <label for="userId">사용자 이름:</label>
         <input type="text" id="userId" name="userId" required>

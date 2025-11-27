@@ -27,7 +27,7 @@
         <p><strong>학번:</strong> <span th:text="${user.studentId}">20251234</span></p>
     </div>
 
-    <form action="/mypage/update" method="post">
+    <form action="/api/auth/mypage/update" method="post">
         <h3>상세 정보 입력/수정</h3>
 
         <div class="form-group">
@@ -78,7 +78,7 @@
     </form>
 
     <br>
-    <form th:action="@{/logout}" method="post">
+    <form th:action="@{/api/auth/logout}" method="post">
         <button type="submit" style="background-color: #6c757d;">로그아웃</button>
     </form>
 </div>

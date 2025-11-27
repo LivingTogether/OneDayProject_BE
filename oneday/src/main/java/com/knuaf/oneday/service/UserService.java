@@ -3,8 +3,10 @@ package com.knuaf.oneday.service;
 import com.knuaf.oneday.dto.SignupRequest;
 import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.entity.Advcomp;
+import com.knuaf.oneday.entity.GlobalSW;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.repository.AdvCompRepository;
+import com.knuaf.oneday.repository.GlobalSWRepository;
 import com.knuaf.oneday.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,12 +24,13 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final AdvCompRepository advcompRepository;
     private final PasswordEncoder passwordEncoder;
-
+    private final GlobalSWRepository globalswRepository;
     // 생성자 주입 (여기에 @Lazy 같은 건 필요 없습니다. 파일이 분리되었으니까요!)
-    public UserService(UserRepository userRepository, AdvCompRepository advcompRepository, @Lazy PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, AdvCompRepository advcompRepository, GlobalSWRepository globalswRepository, @Lazy PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.advcompRepository = advcompRepository;
+        this.globalswRepository = globalswRepository;
     }
 
     // 1. 회원가입
@@ -53,7 +56,16 @@ public class UserService implements UserDetailsService {
             advcompRepository.save(adv);
         }
         else if(user.getMajor().equals("글로벌SW융합전공")) {
+            GlobalSW gsw = new GlobalSW();
+            gsw.setStudentId(savedUser.getStudentId());
 
+            gsw.setStartup(0);
+            gsw.setDesignLecture(0);
+            gsw.setEntreLecture(0);
+            gsw.setMultipleMajor(0);
+            gsw.setOverseasCredits(0);
+
+            globalswRepository.save(gsw);
         }
         return savedUser;
     }

@@ -26,7 +26,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/")
+    @GetMapping("/home")
     public String home(){
         return "home";
     }
@@ -42,12 +42,12 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    public String registerUSer(@ModelAttribute SignupRequest request){
+    public String registerUser(@ModelAttribute SignupRequest request){
         userService.register(request);
         //after signup success, redirect to login page
-        return "redirect:/home";
+        return "redirect:/api/auth/home";
     }
-/*
+/* //로그인 경로 우회 X
     @GetMapping("/mypage")
     public String showMyPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
@@ -122,7 +122,6 @@ public String showMyPage(Model model, @AuthenticationPrincipal UserDetails userD
 }
 
     // ✅ 2. 마이페이지 정보 수정 처리 (POST)
-    // HTML form은 기본적으로 PUT을 지원하지 않아 POST를 사용합니다.
     @PostMapping("/mypage/update")
     public String updateMyPage(
             @AuthenticationPrincipal UserDetails userDetails,
@@ -132,7 +131,7 @@ public String showMyPage(Model model, @AuthenticationPrincipal UserDetails userD
         userService.updateUserInfo(userDetails.getUsername(), updateDto);
 
         // 수정 후 다시 마이페이지로 돌아가서 변경된 값 확인
-        return "redirect:/mypage";
+        return "redirect:/api/auth/mypage";
     }
 
     @GetMapping("/welcome")
