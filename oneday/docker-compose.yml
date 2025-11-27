@@ -1,47 +1,17 @@
 version: '3.8'
 
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: knu-server
+  oneday-server:
+    image: chanwooong/oneday-server:latest  # 님 도커 아이디/이미지명
+    container_name: my-backend-server
+    restart: always
+    # 리눅스/EC2에서는 host 모드 추천 (DB 접속 용이)
+    network_mode: "host"
+
+    # 환경 변수 주입 (여기가 핵심!)
     environment:
-      DB_USERNAME: roknu
-      DB_PW: 1234
-      DB_DATABASE: knuproject
-      DB_PORT: 5432
-      SPRING_PORT: 8080
-
-    depends_on:
-      database:
-        condition: service_healthy
-    ports:
-      - "8080:8080"
-    restart: "no"
-
-  database:
-
-    image: postgres:16-alpine
-    container_name: knu-database
-
-    environment:
-      POSTGRES_USER: roknu
-      POSTGRES_PASSWORD: 1234
-      POSTGRES_DB: knuproject
-
-    ports:
-    - "5432:5432"
-    restart: "no"
-    volumes:
-      - knu-database:/var/lib/postgresql/data
-      - ./local_config/pg_hba.conf:/etc/postgresql/pg_hba.conf:ro
-      - ./local_config/postgresql.conf:/etc/postgresql/postgresql.conf:ro
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U roknu -d knuproject" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  knu-database:
+      - TZ=Asia/Seoul
+      # .env 파일에서 값을 읽어와서 여기에 꽂아줍니다.
+      - SPRING_DATASOURCE_URL=${DB_URL}
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PW}
