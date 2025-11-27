@@ -3,6 +3,7 @@ package com.knuaf.oneday.controller;
 import com.knuaf.oneday.dto.CourseRegisterDto;
 import com.knuaf.oneday.dto.CourseUpdateDto;
 import com.knuaf.oneday.dto.UserAttendResponseDto;
+import com.knuaf.oneday.dto.LectureResponseDto;
 import com.knuaf.oneday.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +60,11 @@ public class CourseController {
 
         return ResponseEntity.ok(myCourses);
     }
+
+   // @GetMapping("/standard")
+    //public ResponseEntity<List<LectureResponseDto>> getCourse() {
+      //  List<LectureResponseDto> lectures = lectureService.getLectureList(semester, keyword);
+      //  return ResponseEntity.ok(lectures);
+   // }
 
 }
