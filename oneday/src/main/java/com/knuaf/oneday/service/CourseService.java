@@ -41,6 +41,9 @@ public class CourseService {
         } catch (Exception e) {
             throw new IllegalArgumentException("해당 학기에 존재하지 않는 과목입니다.");
         }
+        if (userAttendRepository.existsByStudentIdAndLecId(studentId, request.getLecId())) {
+            throw new IllegalArgumentException("이미 수강 신청한 과목입니다.");
+        }
 
         UserAttend newHistory = UserAttend.builder()
                 .studentId(studentId)
@@ -59,8 +62,8 @@ public class CourseService {
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, request.getLecId())
                 .orElseThrow(() -> new IllegalArgumentException("신청하지 않은 과목입니다."));
 
-        userAttend.changeGrade(request.getGrade());
-        userAttend.changeLecType(request.getLectureType());
+        userAttend.changeGrade(request.getReceived_grade());
+        userAttend.changeLecType(request.getLecType());
         userAttendRepository.save(userAttend);
     }
 
@@ -94,4 +97,5 @@ public class CourseService {
                 .map(UserAttendResponseDto::from)
                 .collect(Collectors.toList());
     }
+
 }
