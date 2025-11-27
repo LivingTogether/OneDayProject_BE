@@ -38,6 +38,7 @@ public class UserAttend {
 
     private String language;
 
+
     @Builder
     public UserAttend(Long studentId, Lecture lecture, Float receivedGrade) {
         this.studentId = studentId;
