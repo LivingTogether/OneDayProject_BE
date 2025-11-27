@@ -2,15 +2,19 @@ package com.knuaf.oneday.service;
 
 import com.knuaf.oneday.dto.CourseRegisterDto;
 import com.knuaf.oneday.dto.CourseUpdateDto;
+import com.knuaf.oneday.dto.UserAttendResponseDto;
 import com.knuaf.oneday.entity.Lecture;
 import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.LectureRepository;
 import com.knuaf.oneday.repository.UserAttendRepository;
 import jakarta.persistence.EntityManager;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.knuaf.oneday.component.LectureTableNameProvider;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +60,8 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("신청하지 않은 과목입니다."));
 
         userAttend.changeGrade(request.getGrade());
+        userAttend.changeLecType(request.getLectureType());
+        userAttendRepository.save(userAttend);
     }
 
     // [삭제] deleteCourse
@@ -75,5 +81,17 @@ public class CourseService {
         }
         // 만약 "-" 기준으로 자르고 싶다면 아래 코드 사용
         return rawId.split("-")[0];
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserAttendResponseDto> getMyCourseHistory(Long studentId) {
+
+        // 1. 내 학번으로 저장된 모든 내역 조회
+        List<UserAttend> historyList = userAttendRepository.findAllByStudentId(studentId);
+
+        // 2. DTO로 변환하여 반환
+        return historyList.stream()
+                .map(UserAttendResponseDto::from)
+                .collect(Collectors.toList());
     }
 }

@@ -38,6 +38,7 @@ public class UserAttend {
 
     private String language;
 
+
     @Builder
     public UserAttend(Long studentId, Lecture lecture, Float receivedGrade) {
         this.studentId = studentId;
@@ -52,5 +53,8 @@ public class UserAttend {
     }
     public void changeGrade(Float newGrade) {
         this.receivedGrade = newGrade;
+    }
+    public void changeLecType(String newLecType) {
+        this.lecType = newLecType;
     }
 }
