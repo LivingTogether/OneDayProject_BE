@@ -1,16 +1,8 @@
-# Compiled class file
+# --- 기존 내용 유지 ---
 *.class
-
-# Log file
 *.log
-
-# BlueJ files
 *.ctxt
-
-# Mobile Tools for Java (J2ME)
 .mtj.tmp/
-
-# Package Files #
 *.jar
 *.war
 *.nar
@@ -18,7 +10,21 @@
 *.zip
 *.tar.gz
 *.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# --- [추가] IntelliJ IDEA 설정 (필수 ⭐) ---
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# --- [추가] Gradle 빌드 관련 (필수 ⭐) ---
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# --- [추가] Mac/Windows 시스템 파일 ---
+.DS_Store
+Thumbs.db

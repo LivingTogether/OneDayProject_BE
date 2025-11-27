@@ -1,38 +1,30 @@
-HELP.md
-.gradle
-.env
-build/
-!gradle/wrapper/gradle-wrapper.jar
-!**/src/main/**/build/
-!**/src/test/**/build/
+# --- 기존 내용 유지 ---
+*.class
+*.log
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-bin/
-!**/src/main/**/bin/
-!**/src/test/**/bin/
-
-### IntelliJ IDEA ###
-.idea
+# --- [추가] IntelliJ IDEA 설정 (필수 ⭐) ---
+.idea/
 *.iws
 *.iml
 *.ipr
 out/
-!**/src/main/**/out/
-!**/src/test/**/out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
+# --- [추가] Gradle 빌드 관련 (필수 ⭐) ---
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
 
-### VS Code ###
-.vscode/
+# --- [추가] Mac/Windows 시스템 파일 ---
+.DS_Store
+Thumbs.db
