@@ -19,7 +19,7 @@ public class AdvcompRequest {
     // DTO -> Entity 변환 (여기서 이름 매핑이 일어납니다)
     public Advcomp toEntity() {
         Advcomp advcomp = new Advcomp();
-        advcomp.setStudentId(this.studentId);
+        advcomp.getUser().setStudentId(this.studentId);
         // null이면 0으로 저장 (생성 시)
         advcomp.setAbeek_general(this.abeekGeneral != null ? this.abeekGeneral : 0);
         advcomp.setAbeek_total(this.abeekTotal != null ? this.abeekTotal : 0);

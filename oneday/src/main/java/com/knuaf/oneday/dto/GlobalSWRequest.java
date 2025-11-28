@@ -19,7 +19,7 @@ public class GlobalSWRequest {
     // DTO -> Entity 변환
     public GlobalSW toEntity() {
         GlobalSW globalSW = new GlobalSW();
-        globalSW.setStudentId(this.studentId);
+        globalSW.getUser().setStudentId(this.studentId);
         // 값이 없으면 0으로 초기화 (생성 시)
         globalSW.setOverseasCredits(this.overseasCredits != null ? this.overseasCredits : 0);
         globalSW.setEntreLecture(this.entreLecture != null ? this.entreLecture : 0);

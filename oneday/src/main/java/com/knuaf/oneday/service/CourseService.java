@@ -4,9 +4,11 @@ import com.knuaf.oneday.dto.CourseRegisterDto;
 import com.knuaf.oneday.dto.CourseUpdateDto;
 import com.knuaf.oneday.dto.UserAttendResponseDto;
 import com.knuaf.oneday.entity.Lecture;
+import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.LectureRepository;
 import com.knuaf.oneday.repository.UserAttendRepository;
+import com.knuaf.oneday.repository.UserRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,10 +24,11 @@ public class CourseService {
     private final EntityManager em; // ★ Native Query를 날리기 위한 매니저
     private final LectureRepository lectureRepository;
     private final UserAttendRepository userAttendRepository;
-
+    private final UserRepository userRepository;
+    private final CreditService creditService;
     // [등록] registerCourse
     @Transactional
-    public Long registerCourse(Long studentId, CourseRegisterDto request) {
+    public void registerCourse(Long studentId, CourseRegisterDto request) {
 
 
         String tableName = "lecture_list_2025"+request.getSemester();
@@ -51,7 +54,8 @@ public class CourseService {
                 .receivedGrade(request.getReceived_grade())
                 .build();
 
-        return userAttendRepository.save(newHistory).getIdx();
+        userAttendRepository.save(newHistory).getIdx();
+        creditService.recalculateTotalCredits(studentId);
     }
 
     // [수정] updateCourseGrade
@@ -62,9 +66,13 @@ public class CourseService {
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, request.getLecId())
                 .orElseThrow(() -> new IllegalArgumentException("신청하지 않은 과목입니다."));
 
+        User user = userRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
+
         userAttend.changeGrade(request.getReceived_grade());
         userAttend.changeLecType(request.getLecType());
         userAttendRepository.save(userAttend);
+        creditService.recalculateTotalCredits(studentId);
     }
 
     // [삭제] deleteCourse
@@ -74,7 +82,9 @@ public class CourseService {
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, rawLecId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 수강 내역이 없습니다."));
 
-        userAttendRepository.delete(userAttend);
+       userAttendRepository.delete(userAttend);
+
+        creditService.recalculateTotalCredits(studentId);
     }
 
     private String parseLecId(String rawId) {
@@ -97,5 +107,6 @@ public class CourseService {
                 .map(UserAttendResponseDto::from)
                 .collect(Collectors.toList());
     }
+
 
 }

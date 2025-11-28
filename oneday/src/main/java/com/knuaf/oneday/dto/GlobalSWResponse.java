@@ -19,7 +19,7 @@ public class GlobalSWResponse {
     public static GlobalSWResponse from(GlobalSW entity) {
         return GlobalSWResponse.builder()
                 .id(entity.getId())
-                .studentId(entity.getStudentId())
+                .studentId(entity.getUser().getStudentId())
                 .overseasCredits(entity.getOverseasCredits())
                 .entreLecture(entity.getEntreLecture())
                 .startup(entity.getStartup())

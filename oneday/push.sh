@@ -1,6 +1,11 @@
 #!/bin/bash
+set -e
+
+echo "Gradle Daemon Stopping..."
+./gradlew --stop
 
 # 1. 자바 빌드 (테스트 생략하고 빠르게)
+
 echo "Gradle Build..."
 ./gradlew clean build -x test
 

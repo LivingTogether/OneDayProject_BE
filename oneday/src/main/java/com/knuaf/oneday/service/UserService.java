@@ -46,7 +46,7 @@ public class UserService implements UserDetailsService {
 
         if(user.getMajor().equals("심화컴퓨팅전공")) {
             Advcomp adv = new Advcomp();
-            adv.setStudentId(savedUser.getStudentId());
+            adv.setUser(savedUser);
 
             adv.setAbeek_general(0);
             adv.setAbeek_total(0);
@@ -57,7 +57,7 @@ public class UserService implements UserDetailsService {
         }
         else if(user.getMajor().equals("글로벌SW융합전공")) {
             GlobalSW gsw = new GlobalSW();
-            gsw.setStudentId(savedUser.getStudentId());
+            gsw.setUser(savedUser);
 
             gsw.setStartup(0);
             gsw.setDesignLecture(0);

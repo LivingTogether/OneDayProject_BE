@@ -18,7 +18,7 @@ public class AdvcompResponse {
     public static AdvcompResponse from(Advcomp entity) {
         return AdvcompResponse.builder()
                 .id(entity.getId())
-                .studentId(entity.getStudentId())
+                .studentId(entity.getUser().getStudentId())
                 // 엔티티의 스네이크케이스 필드를 DTO의 카멜케이스로 매핑
                 .abeekGeneral(entity.getAbeek_general())
                 .abeekTotal(entity.getAbeek_total())

@@ -7,11 +7,11 @@ import java.util.Optional;
 
 public interface AdvCompRepository extends JpaRepository<Advcomp,Long> {
     // studentId로 조회
-    Optional<Advcomp> findByStudentId(Long studentId);
+    Optional<Advcomp> findByUser_StudentId(Long studentId);
 
     // studentId로 존재 여부 확인
-    boolean existsByStudentId(Long studentId);
+    boolean existsByUser_StudentId(Long studentId);
 
     // studentId로 삭제
-    void deleteByStudentId(Long studentId);
+    void deleteByUser_StudentId(Long studentId);
 }

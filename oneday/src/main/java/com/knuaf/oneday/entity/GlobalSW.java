@@ -1,18 +1,23 @@
 package com.knuaf.oneday.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
 public class GlobalSW {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column
-    private Long studentId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", referencedColumnName = "student_id")
+    private User user;
+
     @Column
     private Integer overseasCredits; // 해외대학 인정학점
     @Column
@@ -24,4 +29,12 @@ public class GlobalSW {
     @Column
     private Integer designLecture; // 종합설계과목
 
+    @Builder
+    public GlobalSW(User user) {
+        this.user = user;
+    }
+
+    public void updateCredits(int multiple) {
+        this.multipleMajor = multiple;
+    }
 }

@@ -17,23 +17,23 @@ public class AdvcompService {
 
     // 1. 생성 (Create)
     public Long create(AdvcompRequest request) {
-        if (advcompRepository.existsByStudentId(request.getStudentId())) {
+        if (advcompRepository.existsByUser_StudentId(request.getStudentId())) {
             throw new IllegalArgumentException("이미 등록된 학번입니다.");
         }
-        return advcompRepository.save(request.toEntity()).getStudentId();
+        return advcompRepository.save(request.toEntity()).getUser().getStudentId();
     }
 
     // 2. 조회 (Read)
     @Transactional(readOnly = true)
     public AdvcompResponse getInfo(Long studentId) {
-        Advcomp entity = advcompRepository.findByStudentId(studentId)
+        Advcomp entity = advcompRepository.findByUser_StudentId(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 정보가 없습니다."));
         return AdvcompResponse.from(entity);
     }
 
     // 3. 수정 (Patch) - 값이 있는 것만 수정
     public void update(Long studentId, AdvcompRequest request) {
-        Advcomp entity = advcompRepository.findByStudentId(studentId)
+        Advcomp entity = advcompRepository.findByUser_StudentId(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 학번의 정보가 없습니다."));
 
         // DTO(카멜) -> Entity(스네이크) 매핑하면서 null 체크
@@ -45,9 +45,9 @@ public class AdvcompService {
 
     // 4. 삭제 (Delete)
     public void delete(Long studentId) {
-        if (!advcompRepository.existsByStudentId(studentId)) {
+        if (!advcompRepository.existsByUser_StudentId(studentId)) {
             throw new IllegalArgumentException("삭제할 정보가 없습니다.");
         }
-        advcompRepository.deleteByStudentId(studentId);
+        advcompRepository.deleteByUser_StudentId(studentId);
     }
 }

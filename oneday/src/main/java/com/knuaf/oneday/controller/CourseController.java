@@ -32,6 +32,12 @@ public class CourseController {
         // 3. 유저 엔티티에 저장된 실제 학번(Long) 반환
         return user.getStudentId();
     }
+    private String getSpecific_major(Authentication authentication) {
+        String loginId = authentication.getName();
+        User user = userRepository.findByUserId(loginId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 전공입니다."));
+        return user.getSpecific_major();
+    }
 
     // 1. 수강 내역 등록
     @PostMapping("/register")
@@ -40,6 +46,7 @@ public class CourseController {
             @RequestBody CourseRegisterDto request
     ) {
         Long studentId = getStudentId(authentication); // ★ 헬퍼 메서드 호출
+        String s_major = getSpecific_major(authentication);
 
         courseService.registerCourse(studentId, request);
         return ResponseEntity.ok("수강 내역이 등록되었습니다.");
@@ -52,6 +59,7 @@ public class CourseController {
             @RequestBody CourseUpdateDto request
     ) {
         Long studentId = getStudentId(authentication); // ★ 헬퍼 메서드 호출
+        String s_major = getSpecific_major(authentication);
 
         courseService.updateCourseGrade(studentId, request);
         return ResponseEntity.ok("성적이 수정되었습니다.");

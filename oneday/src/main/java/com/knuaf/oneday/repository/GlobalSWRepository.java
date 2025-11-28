@@ -6,11 +6,11 @@ import java.util.Optional;
 
 public interface GlobalSWRepository extends JpaRepository<GlobalSW, Long> {
     // 학번으로 조회
-    Optional<GlobalSW> findByStudentId(Long studentId);
+    Optional<GlobalSW> findByUser_StudentId(Long studentId);
 
     // 학번 존재 여부
-    boolean existsByStudentId(Long studentId);
+    boolean existsByUser_StudentId(Long studentId);
 
     // 학번으로 삭제
-    void deleteByStudentId(Long studentId);
+    void deleteByUser_StudentId(Long studentId);
 }
