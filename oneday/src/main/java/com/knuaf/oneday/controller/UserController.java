@@ -4,6 +4,8 @@ import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.dto.SignupRequest;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,7 +37,19 @@ public class UserController {
     public String login(){
         return "login";
     }
+    @PostMapping("/withdraw")
+    public String withdraw(@AuthenticationPrincipal UserDetails userDetails, HttpServletRequest request){
+        if(userDetails != null) {
+            userService.deleteUser(userDetails.getUsername());
+        }
 
+        HttpSession session = request.getSession(false);
+        if(session != null){
+            session.invalidate();
+        }
+
+        return "redirect:/api/auth/home";
+    }
     @GetMapping("/signup")
     public String signup(){
         return "signup";
@@ -93,7 +107,7 @@ public String showMyPage(Model model, @AuthenticationPrincipal UserDetails userD
     // 2. 로그인을 안 한 경우 (Guest)
     else {
         user = new User();
-        user.setUserId("guest");
+        user.setUserId("Guest");
         user.setStudentId(2022000000); // String 타입이라면 따옴표, Long이면 L 붙이기
         user.setMajor("글로벌소프트웨어융합전공");
 
@@ -114,7 +128,6 @@ public String showMyPage(Model model, @AuthenticationPrincipal UserDetails userD
             UserController.log.warn("Guest user setting error: " + e.getMessage());
         }
     }
-
     // HTML로 user 객체 전달
     model.addAttribute("user", user);
 

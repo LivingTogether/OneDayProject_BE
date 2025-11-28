@@ -18,7 +18,6 @@ public class User {
 
     @Column(unique = true) // 옵션: 아이디 중복 방지
     private String userId; // 로그인 아이디
-
     private String password; //
 
     // 비밀번호
