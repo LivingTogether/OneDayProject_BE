@@ -45,7 +45,7 @@ public class GSWGraduationCheckService {
         // 1. 데이터 조회
         User user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("User 정보가 없습니다."));
-        GlobalSW global = globalSWRepository.findByStudentId(studentId)
+        GlobalSW global = globalSWRepository.findByUser_StudentId(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("GlobalSW 정보가 없습니다."));
 
         // 2. [수정됨] specific_major 값을 보고 트랙 결정

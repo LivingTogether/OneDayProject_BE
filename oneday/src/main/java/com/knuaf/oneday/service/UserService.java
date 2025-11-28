@@ -103,4 +103,21 @@ public class UserService implements UserDetailsService {
 
         return userRepository.save(user);
     }
+
+    //5. 회원탈퇴
+    public void deleteUser(String userId){
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+
+        //advcomp 테이블 데이터 삭제
+        advcompRepository.deleteByUser_StudentId(user.getStudentId());
+        //globalsw 테이블 데이터 삭제
+        globalswRepository.deleteByUser_StudentId(user.getStudentId());
+
+        //aicomp 테이블 데이터 삭제
+        //aicompRepository.deleteByUser_StudentId(user.getStudentId());
+
+        //users 테이블 데이터 삭제
+        userRepository.deleteByUserId(userId);
+    }
 }
