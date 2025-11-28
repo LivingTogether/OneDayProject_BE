@@ -65,10 +65,10 @@ public class LectureService {
     }
     // 학년(grade)과 학기(semester)를 받아서 -> DB에서 상세 정보를 조회하여 반환
     @Transactional(readOnly = true)
-    public List<LectureResponseDto> getStandardCourses(String s_major, int grade, int Semester) {
+    public List<LectureResponseDto> getStandardCourses(String major, int grade, int Semester) {
 
         // 2. 해당 학년/학기에 들어야 할 '강좌번호 리스트' 가져오기 (하드코딩된 메서드 호출)
-        List<String> targetLecIds = getTargetLectureIds(s_major, grade, Semester);
+        List<String> targetLecIds = getTargetLectureIds(major, grade, Semester);
 
         // 해당하는 과목이 없으면 빈 리스트 반환
         if (targetLecIds.isEmpty()) {
@@ -102,9 +102,9 @@ public class LectureService {
     // ========================================================
     // ★ [설정] 학년/학기별 권장 과목 ID 리스트 (여기만 관리하면 됨)
     // ========================================================
-    private List<String> getTargetLectureIds(String s_major, int grade, int term) {
+    private List<String> getTargetLectureIds(String major, int grade, int term) {
         List<String> ids = new ArrayList<>();
-        if(s_major.equals("심화컴퓨팅전공")){
+        if("심화컴퓨팅전공".equals(major)){
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0045");
@@ -210,7 +210,7 @@ public class LectureService {
                 }
             }
         }
-        else if(s_major.equals("글로벌sw융합전공")){
+        else if("글로벌SW융합전공".equals(major)){
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0205");
@@ -302,6 +302,7 @@ public class LectureService {
                 }
             }
         }
+
 
         return ids;
     }

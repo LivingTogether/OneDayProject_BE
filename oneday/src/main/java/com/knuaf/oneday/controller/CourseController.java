@@ -23,8 +23,7 @@ public class CourseController {
 
     private Long getStudentId(Authentication authentication) {
         // 1. 시큐리티 컨텍스트에서 로그인 아이디(예: "sion") 꺼내기
-       // String loginId = authentication.getName();
-        String loginId = "sion";
+        String loginId = authentication.getName();
         // 2. DB에서 유저 정보 찾기
         User user = userRepository.findByUserId(loginId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
@@ -45,9 +44,8 @@ public class CourseController {
             Authentication authentication, // ★ 인증 객체 주입
             @RequestBody CourseRegisterDto request
     ) {
-        //Long studentId = getStudentId(authentication); // ★ 헬퍼 메서드 호출
+        Long studentId = getStudentId(authentication); // ★ 헬퍼 메서드 호출
         String s_major = getSpecific_major(authentication);
-        Long studentId = 2022110617L;
         courseService.registerCourse(studentId, request);
         return ResponseEntity.ok("수강 내역이 등록되었습니다.");
     }

@@ -83,7 +83,6 @@ public class CourseService {
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 수강 내역이 없습니다."));
 
        userAttendRepository.delete(userAttend);
-
         creditService.recalculateTotalCredits(studentId);
     }
 

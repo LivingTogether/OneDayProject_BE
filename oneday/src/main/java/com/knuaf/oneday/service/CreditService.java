@@ -26,24 +26,40 @@ public class CreditService {
         List<UserAttend> allAttends = userAttendRepository.findAllByStudentId(studentId);
 
         // 3. 트랙별 계산
-        if ("심화컴퓨팅전공".equals(user.getSpecific_major())) {
+        if ("심화컴퓨팅전공".equals(user.getMajor())) {
             calculateForAdvComputing(user, allAttends);
-        } else if ("글로벌소프트웨어융합전공".equals(user.getSpecific_major())) {
+        } else if ("글로벌SW융합전공".equals(user.getMajor())) {
             calculateForGlobSw(user, allAttends);
         }
     }
 
     private void calculateForAdvComputing(User user, List<UserAttend> attends) {
         int abeekGen = 0, baseMaj = 0, enginMaj = 0, etcSum = 0;
-
+        int general = 0, major = 0, multipleSum = 0 ;
         for (UserAttend attend : attends) {
             String type = attend.getLecType();
             int credit = attend.getCredit();
 
             if ("기본소양".equals(type)) abeekGen += credit;
-            else if ("전공기반".equals(type)) baseMaj += credit;
-            else if ("공학전공".equals(type)) enginMaj += credit;
-            else etcSum += credit;
+            else if ("전공기반".equals(type)) {
+                baseMaj += credit;
+                major += credit;
+            }
+            else if ("공학전공".equals(type)) {
+                enginMaj += credit;
+                major += credit;
+            }
+            else if ("교양".equals(type)) general += credit;
+            else if ("전공".equals(type)) major += credit;
+            else if ("전공필수".equals(type)) major += credit;
+            else if ("전공선택".equals(type)) major += credit;
+            else if ("전공기초".equals(type)) major += credit;
+            else if ("교양필수".equals(type)) general += credit;
+            else if ("교양선택".equals(type)) general += credit;
+            else if ("일반선택".equals(type)) etcSum += credit;
+           // else if ("복수전공".equals(type)) multipleSum += credit;
+           // else if ("부전공".equals(type)) multipleSum += credit;
+           // else if ("융합전공".equals(type)) multipleSum += credit;
         }
 
         // ★ [핵심] 유저 객체를 통해 기존 데이터가 있는지 확인
@@ -55,9 +71,9 @@ public class CreditService {
         }
 
         adv.updateCredits(abeekGen, baseMaj, enginMaj);
-        user.updateGeneralCredit(abeekGen);
-        user.updateMajorCredit(baseMaj+enginMaj);
-        user.updateTotalCredit(abeekGen+baseMaj+enginMaj+etcSum);
+        user.updateGeneralCredit(abeekGen+general);
+        user.updateMajorCredit(baseMaj+enginMaj+major);
+        user.updateTotalCredit(abeekGen+baseMaj+enginMaj+etcSum+general+major);
     }
 
     private void calculateForGlobSw(User user, List<UserAttend> attends) {
@@ -67,9 +83,17 @@ public class CreditService {
             String type = attend.getLecType();
             int credit = attend.getCredit();
 
-            if (type.contains("전공")) majorSum += credit;
-            else if (type.contains("교양")) generalSum += credit;
-            else if (type.contains("다중")) multipleSum += credit;
+            if ("전공필수".equals(type)) majorSum += credit;
+            else if ("교양".equals(type)) generalSum += credit;
+            else if ("전공".equals(type)) majorSum += credit;
+            else if ("전공선택".equals(type)) majorSum += credit;
+            else if ("전공기초".equals(type)) majorSum += credit;
+            else if ("교양필수".equals(type)) generalSum += credit;
+            else if ("교양선택".equals(type)) generalSum += credit;
+            else if ("일반선택".equals(type)) etcSum += credit;
+            else if ("복수전공".equals(type)) multipleSum += credit;
+            else if ("부전공".equals(type)) multipleSum += credit;
+            else if ("융합전공".equals(type)) multipleSum += credit;
             else etcSum += credit;
         }
 
