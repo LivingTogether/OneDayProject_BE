@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 @Controller
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://16.176.198.162:8080") // 3000번 포트 허용
+//@CrossOrigin(origins = "http://16.176.198.162:8080") // 3000번 포트 허용
   
 public class UserController {
 
