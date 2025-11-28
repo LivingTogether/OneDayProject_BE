@@ -2,152 +2,242 @@ package com.knuaf.oneday.service;
 
 import com.knuaf.oneday.dto.GraduationCheckResponse;
 import com.knuaf.oneday.dto.GraduationCheckResponse.CheckItem;
+import com.knuaf.oneday.dto.GraduationCriteria;
 import com.knuaf.oneday.entity.Advcomp;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.AdvCompRepository;
-import com.knuaf.oneday.repository.UserAttendRepository; // ★ 추가
+import com.knuaf.oneday.repository.UserAttendRepository;
 import com.knuaf.oneday.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AdvGraduationCheckService {
 
     private final UserRepository userRepository;
     private final AdvCompRepository advcompRepository;
-    private final UserAttendRepository userAttendRepository; // ★ 추가: 수강 내역 조회용
+    private final UserAttendRepository userAttendRepository;
 
-    // 2021~2025학번 기준 상수 정의
-    private static final int REQ_TOTAL_CREDIT = 140;
-    private static final int REQ_ABEEK_GENERAL = 15;
-    private static final int REQ_BASE_MAJOR = 18;
-    private static final int REQ_ENGIN_MAJOR = 60;
-    private static final int REQ_ABEEK_TOTAL = 93;
-    private static final int REQ_TOEIC = 700;
+    // =============================================================
+    // 1. 필수 과목 리스트 정의 (이미지 주석 3, 4번 반영)
+    // =============================================================
 
-    // ★ 추가: 심화컴퓨터 필수 과목 리스트 (과목코드, 과목명)
-    // ※ 학교 커리큘럼에 맞춰 코드를 정확히 수정해야 합니다.
-    private static final Map<String, String> REQUIRED_COURSES = new LinkedHashMap<>() {{
-        put("CLTR0819", "기초수학2");
-        put("COME0301", "이산수학");
+    // [공통] 공학전공 필수 (2012학번 이후 공통 적용 - 주석 4번)
+    // 이론 7과목 + 설계 3과목
+    private static final Map<String, String> COMMON_MAJOR_REQUIRED = new LinkedHashMap<>() {{
         put("COMP0204", "프로그래밍기초");
-        put("COMP0205", "기초창의공학설계");
         put("COME0331", "자료구조");
         put("COMP0217", "자바프로그래밍");
-        put("COMP0411", "컴퓨터구조");
         put("ELEC0462", "시스템프로그래밍");
+        put("COMP0411", "컴퓨터구조");
         put("COMP0312", "운영체제");
-        put("COMP0319", "알고리즘");
+        put("COMP0319", "알고리즘1"); // 이미지엔 '알고리즘1'로 표기됨
+        // 설계 과목
+        put("COMP0205", "기초창의공학설계");
         put("ITEC0401", "종합설계프로젝트1");
         put("ITEC0402", "종합설계프로젝트2");
-        // 필요한 과목 계속 추가...
     }};
+
+    // [변동] 전공기반(MSC) - 2023학번부터 (주석 3번)
+    // 기초수학2, 이산수학
+    private static final Map<String, String> MSC_2023 = new LinkedHashMap<>() {{
+        put("CLTR0819", "기초수학2");
+        put("COME0301", "이산수학");
+    }};
+
+    // [변동] 전공기반(MSC) - ~2022학번까지 (주석 3번)
+    // 수학1, 물리학1, 이산수학
+    // ★ 주의: 수학1, 물리학1 코드는 DB 확인 후 수정 필수!
+    private static final Map<String, String> MSC_PRE_2023 = new LinkedHashMap<>() {{
+        put("MATH1001", "수학1");   // 코드 수정 필요
+        put("PHYS1001", "물리학1"); // 코드 수정 필요
+        put("COME0301", "이산수학");
+    }};
+
 
     @Transactional(readOnly = true)
     public GraduationCheckResponse checkGraduation(Long studentId) {
+        log.info("심화컴퓨터 졸업요건 체크 시작: {}", studentId);
 
-        // 1. 사용자 정보 가져오기
+        // 1. 정보 조회
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
-
+                .orElseThrow(() -> new IllegalArgumentException("User 정보가 없습니다."));
         Advcomp adv = advcompRepository.findByUser_StudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("심화컴퓨터 이수 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("심화컴퓨터 이수 정보가 없습니다."));
+
+        // 2. 입학년도 계산
+        int entryYear = (int) (studentId / 1000000);
+
+        // 3. 기준 가져오기
+        GraduationCriteria criteria = getCriteriaByYear(entryYear);
 
         List<CheckItem> items = new ArrayList<>();
         boolean allPassed = true;
 
-        // 2. [기존] 학점 및 점수 검증 로직
-
-        // (1) 총 이수학점
+        // ----------------------------------------------------
+        // [본부 요건]
+        // ----------------------------------------------------
         int currentTotal = user.getTotal_credit() != null ? user.getTotal_credit().intValue() : 0;
-        if (!addCheckItem(items, "총 이수학점", currentTotal, REQ_TOTAL_CREDIT)) allPassed = false;
+        if (!addCheckItem(items, "[본부] 총 이수학점", currentTotal, criteria.getTotalCredits())) allPassed = false;
 
-        // (2) 기본소양
-        int currentGeneral = adv.getAbeek_general() != null ? adv.getAbeek_general() : 0;
-        if (!addCheckItem(items, "기본소양(교양)", currentGeneral, REQ_ABEEK_GENERAL)) allPassed = false;
+        int currentGeneral = user.getGeneral_credit() != null ? user.getGeneral_credit().intValue() : 0;
+        boolean passGen = currentGeneral >= criteria.getGeneralMin() && currentGeneral <= criteria.getGeneralMax();
+        String msgGen = passGen ? "통과" : (currentGeneral < criteria.getGeneralMin() ? (currentGeneral - criteria.getGeneralMin()) + " (부족)" : "초과");
+        items.add(CheckItem.builder().category("[본부] 교양학점").current(currentGeneral).required(criteria.getGeneralMin()).isPassed(passGen).message(msgGen).build());
+        if (!passGen) allPassed = false;
 
-        // (3) 전공기반
-        int currentBase = adv.getBase_major() != null ? adv.getBase_major() : 0;
-        if (!addCheckItem(items, "전공기반", currentBase, REQ_BASE_MAJOR)) allPassed = false;
-
-        // (4) 공학전공
-        int currentEngin = adv.getEngin_major() != null ? adv.getEngin_major() : 0;
-        if (!addCheckItem(items, "공학전공", currentEngin, REQ_ENGIN_MAJOR)) allPassed = false;
-
-        // (5) ABEEK 총점
-        int currentAbeekTotal = adv.getAbeek_total() != null ? adv.getAbeek_total() : 0;
-        if (!addCheckItem(items, "ABEEK 총점", currentAbeekTotal, REQ_ABEEK_TOTAL)) allPassed = false;
-
-        // (6) 영어 성적
-        int currentEngScore = user.getEng_score() != null ? user.getEng_score().intValue() : 0;
-        if (!addCheckItem(items, "영어 성적(토익)", currentEngScore, REQ_TOEIC)) allPassed = false;
-
-        // (7) 현장실습
-        boolean isInternshipDone = user.isInternship();
-        items.add(CheckItem.builder()
-                .category("현장실습")
-                .current(isInternshipDone ? 1 : 0)
-                .required(1)
-                .isPassed(isInternshipDone)
-                .message(isInternshipDone ? "이수 완료" : "미이수")
-                .build());
-        if (!isInternshipDone) allPassed = false;
+        int currentEng = user.getEng_score() != null ? user.getEng_score().intValue() : 0;
+        if (!addCheckItem(items, "[본부] 영어성적", currentEng, criteria.getEngScore())) allPassed = false;
 
         // ----------------------------------------------------
-        // 3. [추가] 필수 과목 이수 여부 체크
+        // [ABEEK 요건]
         // ----------------------------------------------------
+        int curAbeekGen = adv.getAbeek_general() != null ? adv.getAbeek_general() : 0;
+        if (!addCheckItem(items, "[ABEEK] 기본소양", curAbeekGen, criteria.getAbeekGeneral())) allPassed = false;
 
-        // 3-1. 학생이 들은 모든 과목의 코드를 가져옴 (Set으로 조회 속도 향상)
+        int curBaseMajor = adv.getBase_major() != null ? adv.getBase_major() : 0;
+        if (!addCheckItem(items, "[ABEEK] 전공기반", curBaseMajor, criteria.getAbeekBaseMajor())) allPassed = false;
+
+        int curEnginMajor = adv.getEngin_major() != null ? adv.getEngin_major() : 0;
+        // 공학전공에는 설계 14학점이 포함되어야 하지만, 여기선 총점만 일단 체크
+        if (!addCheckItem(items, "[ABEEK] 공학전공", curEnginMajor, criteria.getAbeekEnginMajor())) allPassed = false;
+
+        int curAbeekTotal = adv.getAbeek_total() != null ? adv.getAbeek_total() : 0;
+        if (!addCheckItem(items, "[ABEEK] 인증총점", curAbeekTotal, criteria.getAbeekTotal())) allPassed = false;
+
+        boolean internship = user.isInternship();
+        items.add(CheckItem.builder().category("현장실습").current(internship ? 1 : 0).required(1).isPassed(internship).message(internship ? "이수" : "미이수").build());
+        if (!internship) allPassed = false;
+
+        // ----------------------------------------------------
+        // [필수 과목 체크]
+        // ----------------------------------------------------
         List<UserAttend> takenLectures = userAttendRepository.findByStudentId(studentId);
-
         Set<String> takenCodes = takenLectures.stream()
-                .map(UserAttend::getLecId) // 과목번호(lec_num)와 매핑된 ID
+                .map(UserAttend::getLecId)
                 .filter(Objects::nonNull)
                 .map(String::trim)
                 .collect(Collectors.toSet());
 
-        // 3-2. 필수 과목 Map을 순회하며 안 들은 과목 찾기
+        Map<String, String> targetCourses = criteria.getRequiredCourses();
         List<String> missingCourses = new ArrayList<>();
 
-        for (Map.Entry<String, String> entry : REQUIRED_COURSES.entrySet()) {
+        for (Map.Entry<String, String> entry : targetCourses.entrySet()) {
             String code = entry.getKey();
             String name = entry.getValue();
-
             if (!takenCodes.contains(code)) {
-                // 이름과 코드를 같이 저장 (예: "자료구조 (COMP0205)")
                 missingCourses.add(name + " (" + code + ")");
             }
         }
 
-        // 3-3. 결과 반영
         boolean passCourses = missingCourses.isEmpty();
-
         items.add(CheckItem.builder()
                 .category("필수과목 이수")
-                .current(REQUIRED_COURSES.size() - missingCourses.size()) // 이수 과목 수
-                .required(REQUIRED_COURSES.size()) // 전체 필수 수
+                .current(targetCourses.size() - missingCourses.size())
+                .required(targetCourses.size())
                 .isPassed(passCourses)
                 .message(passCourses ? "모두 이수함" : missingCourses.size() + "과목 미이수")
                 .build());
 
         if (!passCourses) allPassed = false;
 
-        // 4. 결과 반환
         return GraduationCheckResponse.builder()
                 .studentId(studentId)
                 .isGraduationPossible(allPassed)
                 .checkList(items)
-                .missingCourses(missingCourses) // ★ 부족한 과목 리스트 추가
+                .missingCourses(missingCourses)
                 .build();
     }
 
-    // 헬퍼 메서드: 코드 중복 제거를 위해 리팩토링
+    // =========================================================
+    // ★ [핵심] 입학년도별 기준표 생성 (이미지 분석 반영)
+    // =========================================================
+    private GraduationCriteria getCriteriaByYear(int year) {
+
+        // 1. 필수 과목 리스트 병합 (공통 전공 + 학번별 MSC)
+        Map<String, String> requiredCourses = new LinkedHashMap<>(COMMON_MAJOR_REQUIRED);
+        // 연도별 교양 학점 기준 다름
+        int genMin,genMax=999;
+        if(year<=2017){
+            genMin = 30;
+        }
+        else if(year<=2022){
+            genMin = 24;
+            genMax = 42;
+        }
+        else if(year<=2023){
+            genMin = 30;
+        }else{
+            genMin = 30;
+        }
+
+        if (year >= 2023) {
+            requiredCourses.putAll(MSC_2023); // 기초수학2, 이산수학
+        } else {
+            requiredCourses.putAll(MSC_PRE_2023); // 수학1, 물리1, 이산수학
+        }
+
+        // 2. 학점 기준 설정
+        // [A] 2023학번 ~ (최신)
+        if (year >= 2023) {
+            return GraduationCriteria.builder()
+                    .totalCredits(140)
+                    .generalMin(genMin).generalMax(genMax)
+                    .engScore(700)
+                    .abeekGeneral(15)
+                    .abeekBaseMajor(18)
+                    .abeekEnginMajor(60)
+                    .abeekTotal(93)
+                    .requiredCourses(requiredCourses) // 공통 + MSC_2023
+                    .build();
+        }
+        // [B] 2021 ~ 2022학번
+        else if (year >= 2021) {
+            return GraduationCriteria.builder()
+                    .totalCredits(140)
+                    .generalMin(genMin).generalMax(genMax)
+                    .engScore(700)
+                    .abeekGeneral(15)
+                    .abeekBaseMajor(18)
+                    .abeekEnginMajor(60)
+                    .abeekTotal(93)
+                    .requiredCourses(requiredCourses) // 공통 + MSC_PRE_2023
+                    .build();
+        }
+        // [C] 2012 ~ 2020학번 (고학번 - 학점 기준 높음)
+        else if (year >= 2012) {
+            return GraduationCriteria.builder()
+                    .totalCredits(150)      // ★ 150학점
+                    .generalMin(genMin).generalMax(genMax)
+                    .engScore(700)
+                    .abeekGeneral(15)
+                    .abeekBaseMajor(21)     // ★ 21학점
+                    .abeekEnginMajor(75)    // ★ 75학점
+                    .abeekTotal(111)        // ★ 111학점
+                    .requiredCourses(requiredCourses) // 공통 + MSC_PRE_2023
+                    .build();
+        }
+        // [D] 2011 이전 (예외 처리)
+        else {
+            return GraduationCriteria.builder()
+                    .totalCredits(140)
+                    .generalMin(genMin).generalMax(genMax)
+                    .engScore(700)
+                    .abeekGeneral(15).abeekBaseMajor(18).abeekEnginMajor(60).abeekTotal(93)
+                    .requiredCourses(requiredCourses)
+                    .build();
+        }
+    }
+
     private boolean addCheckItem(List<CheckItem> items, String category, int current, int required) {
         boolean passed = current >= required;
         items.add(CheckItem.builder()
