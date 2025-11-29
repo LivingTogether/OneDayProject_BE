@@ -38,5 +38,10 @@ public class Activity {
     }
 
     public Activity(String category, String title, String detail, String year, User user) {
+        this.category = category;
+        this.title = title;
+        this.detail = detail;
+        this.year = year;
+        this.user = user; // 👈 이게 있어야 student_id가 저장됩니다!
     }
 }
