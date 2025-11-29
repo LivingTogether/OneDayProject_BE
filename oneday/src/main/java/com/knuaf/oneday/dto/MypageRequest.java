@@ -16,5 +16,7 @@ public class MypageRequest {
     private Long total_credit;
     private Long general_credit;
     private Long major_credit;
+    private Double majorgpa;
+    private Double totalgpa;
     private boolean internship;
 }

@@ -95,12 +95,12 @@ public class UserService implements UserDetailsService {
     public User updateUserInfo(String userId, MypageRequest request) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        user.setMajor(request.getMajor());
+        //user.setMajor(request.getMajor());
         user.setSpecific_major(request.getSpecific_major());
         user.setEng_score(request.getEng_score());
-        user.setTotal_credit(request.getTotal_credit());
-        user.setGeneral_credit(request.getGeneral_credit());
-        user.setMajor_credit(request.getMajor_credit());
+        //user.setTotal_credit(request.getTotal_credit());
+        //user.setGeneral_credit(request.getGeneral_credit());
+        //user.setMajor_credit(request.getMajor_credit());
         user.setInternship(request.isInternship());
 
         return userRepository.save(user);
