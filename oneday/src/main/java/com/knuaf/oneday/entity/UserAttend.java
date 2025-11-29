@@ -40,14 +40,20 @@ public class UserAttend {
 
 
     @Builder
-    public UserAttend(Long studentId, Lecture lecture, Float receivedGrade) {
+    public UserAttend(Long studentId, Lecture lecture, String lecType, Float receivedGrade) {
         this.studentId = studentId;
         this.receivedGrade = receivedGrade;
         // Lecture에서 정보 복사
         this.lecId = lecture.getLecNum();
         this.lecName = lecture.getLecName();
         this.credit = lecture.getCredit();
-        this.lecType = lecture.getLecType();
+
+        if (lecType != null && !lecType.isEmpty()) {
+            this.lecType = lecType;
+        } else {
+            this.lecType = lecture.getLecType();
+        }
+
         this.openDepart = lecture.getOpenDepart();
         this.language = lecture.getLanguage();
     }

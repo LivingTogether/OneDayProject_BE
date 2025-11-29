@@ -51,6 +51,7 @@ public class CourseService {
         UserAttend newHistory = UserAttend.builder()
                 .studentId(studentId)
                 .lecture(lecture)
+                .lecType(request.getLecType())
                 .receivedGrade(request.getReceived_grade())
                 .build();
 
@@ -69,7 +70,7 @@ public class CourseService {
         User user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
 
-        userAttend.changeGrade(request.getReceived_grade());
+        userAttend.changeGrade(request.getReceivedGrade());
         userAttend.changeLecType(request.getLecType());
         userAttendRepository.save(userAttend);
         creditService.recalculateTotalCredits(studentId);
