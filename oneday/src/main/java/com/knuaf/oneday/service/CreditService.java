@@ -36,9 +36,17 @@ public class CreditService {
     private void calculateForAdvComputing(User user, List<UserAttend> attends) {
         int abeekGen = 0, baseMaj = 0, enginMaj = 0, etcSum = 0;
         int general = 0, major = 0, multipleSum = 0 ;
+
+        double sumTotalScore = 0.0;
+        int calcTotalCredit = 0;
+
+        double sumMajorScore = 0.0;
+        int calcMajorCredit = 0;
+
         for (UserAttend attend : attends) {
             String type = attend.getLecType();
             int credit = attend.getCredit();
+            Float grade0bj = attend.getReceivedGrade();
 
             if ("기본소양".equals(type)) abeekGen += credit;
             else if ("전공기반".equals(type)) {
@@ -60,6 +68,17 @@ public class CreditService {
            // else if ("복수전공".equals(type)) multipleSum += credit;
            // else if ("부전공".equals(type)) multipleSum += credit;
            // else if ("융합전공".equals(type)) multipleSum += credit;
+            if(grade0bj != null){
+                float grade = grade0bj;
+
+                sumTotalScore += (grade * credit);
+                calcTotalCredit += credit;
+
+                if(isMajorTypeForAdv(type)){
+                    sumMajorScore += (grade * credit);
+                    calcMajorCredit += credit;
+                }
+            }
         }
 
         // ★ [핵심] 유저 객체를 통해 기존 데이터가 있는지 확인
@@ -71,17 +90,25 @@ public class CreditService {
         }
 
         adv.updateCredits(abeekGen, baseMaj, enginMaj);
-        user.updateGeneralCredit(abeekGen+general);
-        user.updateMajorCredit(baseMaj+enginMaj+major);
-        user.updateTotalCredit(abeekGen+baseMaj+enginMaj+etcSum+general+major);
+
+        updateUserEntity(user, abeekGen + general, baseMaj + enginMaj + major,
+                abeekGen + baseMaj + enginMaj + etcSum + general + major,
+                sumTotalScore, calcTotalCredit, sumMajorScore, calcMajorCredit);
     }
 
     private void calculateForGlobSw(User user, List<UserAttend> attends) {
         int majorSum = 0, generalSum = 0, multipleSum = 0, etcSum = 0;
 
+        double sumTotalScore = 0.0;
+        int calcTotalCredit = 0;
+
+        double sumMajorScore = 0.0;
+        int calcMajorCredit = 0;
+
         for (UserAttend attend : attends) {
             String type = attend.getLecType();
             int credit = attend.getCredit();
+            Float grade0bj = attend.getReceivedGrade();
 
             if ("전공필수".equals(type)) majorSum += credit;
             else if ("교양".equals(type)) generalSum += credit;
@@ -95,6 +122,18 @@ public class CreditService {
             else if ("부전공".equals(type)) multipleSum += credit;
             else if ("융합전공".equals(type)) multipleSum += credit;
             else etcSum += credit;
+
+            if(grade0bj != null){
+                Float grade = grade0bj;
+
+                sumTotalScore += (grade * credit);
+                calcTotalCredit += credit;
+
+                if(isMajorTypeForGlob(type)){
+                    sumMajorScore += (grade * credit);
+                    calcMajorCredit += credit;
+                }
+            }
         }
 
         // ★ [핵심] 유저 객체를 통해 확인
@@ -106,8 +145,36 @@ public class CreditService {
         }
 
         glob.updateCredits(multipleSum);
-        user.updateGeneralCredit(generalSum);
-        user.updateMajorCredit(majorSum);
-        user.updateTotalCredit(multipleSum+generalSum+majorSum+etcSum);
+        updateUserEntity(user, generalSum, majorSum,
+                multipleSum + generalSum + majorSum + etcSum,
+                        sumTotalScore, calcTotalCredit, sumMajorScore, calcMajorCredit);
+    }
+    private void updateUserEntity(User user, int generalCredit, int majorCredit, int TotalCredit,
+                                  double sumTotalScore, int calcTotalCredit,
+                                  double sumMajorScore, int calcMajorCredit){
+        user.updateGeneralCredit(generalCredit);
+        user.updateMajorCredit(majorCredit);
+        user.updateTotalCredit(TotalCredit);
+
+        double totalGpa = (calcTotalCredit == 0) ? 0.0 : (sumTotalScore / calcTotalCredit);
+        double majorGpa = (calcMajorCredit == 0) ? 0.0 : (sumMajorScore / calcMajorCredit);
+
+        // 소수점 2자리 반올림
+        totalGpa = Math.round(totalGpa * 100.0) / 100.0;
+        majorGpa = Math.round(majorGpa * 100.0) / 100.0;
+
+        // User 엔티티에 GPA 저장 (User에 setter나 필드가 있어야 함)
+        user.setTotalgpa(totalGpa);
+        user.setMajorGpa(majorGpa);
+    }
+    private boolean isMajorTypeForAdv(String type){
+        return "전공기반".equals(type) || "공학전공".equals(type) ||
+                "전공".equals(type) || "전공필수".equals(type)||
+                "전공선택".equals(type) || "전공기초".equals(type);
+    }
+
+    private boolean isMajorTypeForGlob(String type){
+        return "전공".equals(type) || "전공필수".equals(type)||
+                "전공선택".equals(type) || "전공기초".equals(type);
     }
 }

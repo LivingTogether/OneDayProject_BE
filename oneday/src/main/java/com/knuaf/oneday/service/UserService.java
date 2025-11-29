@@ -5,6 +5,7 @@ import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.entity.Advcomp;
 import com.knuaf.oneday.entity.GlobalSW;
 import com.knuaf.oneday.entity.User;
+import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.AdvCompRepository;
 import com.knuaf.oneday.repository.GlobalSWRepository;
 import com.knuaf.oneday.repository.UserRepository;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.context.annotation.Lazy;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Transactional
@@ -119,5 +121,24 @@ public class UserService implements UserDetailsService {
 
         //users 테이블 데이터 삭제
         userRepository.deleteByUserId(userId);
+    }
+
+    //평균 학점 계산
+    public void recalculateGpaAndCredit(Long studentId){
+        User user = userRepository.findByStudentId(studentId)
+                .orElseThrow(()->new IllegalArgumentException("학생을 찾을 수 없습니다"));
+
+        List<UserAttend> attends = userRepository.findByStudentId(studentId);
+
+        double sumTotoalScore = 0.0;
+        long sumTotalCredit = 0;
+
+        double sumMajorScore = 0.0;
+        long sumMajorCredit = 0;
+
+
+
+
+
     }
 }

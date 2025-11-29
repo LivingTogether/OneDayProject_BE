@@ -12,6 +12,7 @@ public interface UserAttendRepository extends JpaRepository<UserAttend, Long> {
     Optional<UserAttend> findByStudentIdAndLecId(Long studentId, String lecId);
 
     List<UserAttend> findByStudentId(Long studentId);
+
     // 삭제를 위해 존재하는지 확인하는 메서드
     boolean existsByStudentIdAndLecId(Long studentId, String lecId);
 
