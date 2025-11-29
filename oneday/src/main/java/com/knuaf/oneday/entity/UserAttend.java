@@ -38,15 +38,23 @@ public class UserAttend {
 
     private String language;
 
+    @Column(name = "grade")
+    private Integer grade;
+
+    @Column(name = "semester")
+    private Integer semester;
+
 
     @Builder
-    public UserAttend(Long studentId, Lecture lecture, String lecType, Float receivedGrade) {
+    public UserAttend(Long studentId, Lecture lecture, String lecType, Float receivedGrade ,Integer grade, Integer semester) {
         this.studentId = studentId;
         this.receivedGrade = receivedGrade;
         // Lecture에서 정보 복사
         this.lecId = lecture.getLecNum();
         this.lecName = lecture.getLecName();
         this.credit = lecture.getCredit();
+        this.grade = getGrade();
+        this.semester = getSemester();
 
         if (lecType != null && !lecType.isEmpty()) {
             this.lecType = lecType;

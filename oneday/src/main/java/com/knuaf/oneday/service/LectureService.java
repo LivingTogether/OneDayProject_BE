@@ -22,13 +22,11 @@ public class LectureService {
     private final LectureTableNameProvider tableNameProvider; // ★ 테이블 이름 생성기
 
     @Transactional(readOnly = true)
-    public List<LectureResponseDto> getLectureList(int semester, String keyword) {
+    public List<LectureResponseDto> getLectureList(String keyword) {
 
         // 1. Provider를 통해 안전하게 테이블 이름 가져오기
-        // String fullSemester = "2025" + Semester;
-        // 3. DB 테이블 이름 가져오기 (예: lecture_list20251)
         // String tableName = tableNameProvider.getTableName(fullSemester);
-        String tableName = "lecture_list_2025" + semester;
+        String tableName = "lecture_list";
 
         // 2. 동적 SQL 생성
         StringBuilder sql = new StringBuilder();
@@ -77,7 +75,7 @@ public class LectureService {
        // String fullSemester = "2025" + Semester;
         // 3. DB 테이블 이름 가져오기 (예: lecture_list20251)
        // String tableName = tableNameProvider.getTableName(fullSemester);
-        String tableName = "lecture_list_2025" + Semester;
+        String tableName = "lecture_list";
 
         // 4. DB에서 조회 (WHERE lec_num IN (...))
         // JPA Native Query로 'IN' 절 사용하기
@@ -104,7 +102,7 @@ public class LectureService {
     // ========================================================
     private List<String> getTargetLectureIds(String major, int grade, int term) {
         List<String> ids = new ArrayList<>();
-        if("심화컴퓨팅전공".equals(major)){
+        if("심화컴퓨팅전공".equals(major) || "플랫폼".equals(major)) {
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0045");
@@ -299,6 +297,97 @@ public class LectureService {
                     ids.add("GLSO0229");
                     ids.add("ITEC0418");
                     ids.add("ITEC0424");
+                }
+            }
+        }
+        else if("인공지능컴퓨팅전공".equals(major)){
+            if (grade == 1) {
+                if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
+                    ids.add("CLTR0205");
+                    ids.add("CLTR0045");
+                    ids.add("CLTR0819");
+                    ids.add("COMP0453");
+                   // ids.add("신규"); 인공지능과컴퓨팅
+                    ids.add("COME0301");
+
+                } else if (term == 3) {
+                    // [1학년 2학기]
+                    ids.add("CLTR0003");
+                    ids.add("CLTR0211");
+                    ids.add("COMP0454");
+                    ids.add("COMP0204");
+                    ids.add("COMP0205");
+                }
+            } else if (grade == 2) {
+                if (term == 1) {
+                    // [2학년 1학기]
+                    ids.add("MTED0231");
+                    ids.add("COME0331");
+                    ids.add("COMP0216");
+                    ids.add("COMP0217");
+                    ids.add("COMP0411");
+                    ids.add("COMP0315");
+                }
+                if (term == 3) {
+                    // [2학년 2학기]
+                    ids.add("CLTR0246");
+                    ids.add("COME0311");
+                    ids.add("ITEC0419");
+                    ids.add("COMP0324");
+                    ids.add("COMP0312");
+                    ids.add("ELEC0462");
+                    ids.add("COMP0224");
+                }
+            } else if (grade == 3) {
+                if (term == 1) {
+                    // [3학년 1학기]
+                    ids.add("CLTR0264");
+                    ids.add("ITEC");
+                    ids.add("CAIB0233");
+                    ids.add("COMP0321");
+                    ids.add("GLSO0215");
+                    ids.add("COMP0319");
+                    ids.add("COMP0323");
+                }
+                if (term == 3) {
+                    // [3학년 2학기]
+                    ids.add("CLTR0212");
+                    ids.add("MOBI0224");
+                    ids.add("CAIB0211");
+                    ids.add("ITEC0424");
+                    ids.add("CAIB0216");
+                    ids.add("COMP0322");
+                    ids.add("ITEC0401");
+                }
+            } else if (grade == 4) {
+                if (term == 1) {
+                    // [4학년 1학기]
+                    ids.add("FUTR0201");
+                    ids.add("COMP0462");
+                    ids.add("MBIO0402");
+                    ids.add("COMP0419");
+                    ids.add("COMP0219");
+                    ids.add("CAIB0222");
+                    ids.add("CAIB0234");
+                    ids.add("CAIB0225");
+                    ids.add("COMP0414");
+                    ids.add("ITEC0415");
+                    ids.add("COMP0460");
+
+                }
+                if (term == 3) {
+                    // [4학년 2학기]
+                    ids.add("CLTR0078");
+                    ids.add("COMP0457");
+                    ids.add("CAIB0224");
+                    ids.add("COMP0455");
+                    ids.add("ITEC0514");
+                    ids.add("COMP0436");
+                    ids.add("COMP0328");
+                    ids.add("COME0368");
+                    ids.add("ITEC0418");
+                    ids.add("GLSO0227");
+                  //  ids.add("신규"); AI심화글쓰기
                 }
             }
         }

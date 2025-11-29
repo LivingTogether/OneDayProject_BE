@@ -31,7 +31,7 @@ public class CourseService {
     public void registerCourse(Long studentId, CourseRegisterDto request) {
 
 
-        String tableName = "lecture_list_2025"+request.getSemester();
+        String tableName = "lecture_list";
 
         // ★ 2. 쿼리 파라미터에 자른 ID(realLecId) 사용
         String sql = "SELECT * FROM " + tableName + " WHERE lec_num = :lecId"; // 아까 고친 lec_num
@@ -53,6 +53,8 @@ public class CourseService {
                 .lecture(lecture)
                 .lecType(request.getLecType())
                 .receivedGrade(request.getReceived_grade())
+                .grade(request.getGrade())
+                .semester(request.getSemester())
                 .build();
 
         userAttendRepository.save(newHistory).getIdx();
