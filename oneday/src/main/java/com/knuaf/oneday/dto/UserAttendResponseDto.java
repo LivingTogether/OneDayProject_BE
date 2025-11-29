@@ -12,6 +12,8 @@ public class UserAttendResponseDto {
     private String lecType;
     private int credit;     // 학점
     private Float received_grade;
+    private Integer grade;    // 수강 당시 학년
+    private Integer semester;
     // private String semester; // 학기도 필요하다면 UserAttend 엔티티에 필드 추가 후 여기서 반환
 
     // Entity -> DTO 변환 메서드
@@ -22,6 +24,8 @@ public class UserAttendResponseDto {
                 .credit(entity.getCredit())
                 .lecType(entity.getLecType())
                 .received_grade(entity.getReceivedGrade())// 내 성적
+                .grade(entity.getGrade())
+                .semester(entity.getSemester())
                 .build();
     }
 }

@@ -40,10 +40,9 @@ public class LectureController {
     // GET /api/lecture/list?semester=2&keyword=컴퓨터
     @GetMapping("/list")
     public ResponseEntity<List<LectureResponseDto>> getLectureList(
-            @RequestParam int semester,
             @RequestParam(required = false) String keyword
     ) {
-        List<LectureResponseDto> lectures = lectureService.getLectureList(semester, keyword);
+        List<LectureResponseDto> lectures = lectureService.getLectureList(keyword);
         return ResponseEntity.ok(lectures);
     }
 
