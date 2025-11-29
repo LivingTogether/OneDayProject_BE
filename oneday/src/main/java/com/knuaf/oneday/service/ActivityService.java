@@ -43,7 +43,7 @@ public class ActivityService {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
 
-        return activityRepository.findByStudentId(user.getStudentId()).stream()
+        return activityRepository.findByUser_StudentId(user.getStudentId()).stream()
                 .map(a ->new ActivityDto.Response(
                         a.getId(),
                         a.getCategory(),
