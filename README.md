@@ -1,4 +1,4 @@
-# 📕 JOLUV
+# 👨‍🎓 JOLUV
 
 ## 기여자
 <table>
@@ -7,7 +7,7 @@
 
 |                 ChanWoong                  |
 | :---------------------------: |
-| <img width="240px" src="https://avatars.githubusercontent.com/{ChanWooong}" /> |
+| <img width="240px" src="https://avatars.githubusercontent.com/ChanWooong" /> |
 |     [@ChanWooong](https://github.com/ChanWooong)       |
 |          National - 🇰🇷 Republic Of Korea           |
 
@@ -16,7 +16,7 @@
 
 |                  JaeMin Park                   |
 | :------------------------------------------------: |
-| <img width="240px" src="https://avatars.githubusercontent.com/{Woogie333}" /> |
+| <img width="240px" src="https://avatars.githubusercontent.com/Woogie333" /> |
 |     [@woogie333](https://github.com/woogie333) |
 |          National - 🇰🇷 Republic Of Korea            |
 
@@ -25,7 +25,7 @@
 
 |           HyunWook Kwak           |
 | :---------------------------: |
-| <img width="240px" src="https://avatars.githubusercontent.com/{Jmespoir}" /> |
+| <img width="240px" src="https://avatars.githubusercontent.com/Jmespoir" /> |
 |     [@jmespoir](https://github.com/JMespoir)       |
 |          National - 🇰🇷 Republic Of Korea           |
 
