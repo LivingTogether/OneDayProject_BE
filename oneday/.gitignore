@@ -12,6 +12,7 @@
 *.rar
 hs_err_pid*
 replay_pid*
+*.pem
 
 # --- [추가] IntelliJ IDEA 설정 (필수 ⭐) ---
 .idea/
