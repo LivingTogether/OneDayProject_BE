@@ -2,6 +2,7 @@ package com.knuaf.oneday.service;
 
 import com.knuaf.oneday.dto.SignupRequest;
 import com.knuaf.oneday.dto.MypageRequest;
+import com.knuaf.oneday.dto.UserUpdateDto;
 import com.knuaf.oneday.entity.Advcomp;
 import com.knuaf.oneday.entity.GlobalSW;
 import com.knuaf.oneday.entity.User;
@@ -100,16 +101,20 @@ public class UserService implements UserDetailsService {
     }
 
     // 4. 내 정보 수정
-    public User updateUserInfo(String userId, MypageRequest request) {
+    public User updateUserInfo(String userId, UserUpdateDto request) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
-        //user.setMajor(request.getMajor());
-        user.setSpecific_major(request.getSpecific_major());
-        user.setEng_score(request.getEng_score());
-        //user.setTotal_credit(request.getTotal_credit());
-        //user.setGeneral_credit(request.getGeneral_credit());
-        //user.setMajor_credit(request.getMajor_credit());
-        user.setInternship(request.isInternship());
+
+        if (request.getSpecific_major() != null) {
+            user.setSpecific_major(request.getSpecific_major());
+        }
+        // eng_score는 숫자(Long)이므로 null 체크 가능
+        if (request.getEng_score() != null) {
+            user.setEng_score(request.getEng_score());
+        }
+        if(request.getInternship() != null){
+            user.setInternship(request.getInternship());
+        }
 
         return userRepository.save(user);
     }

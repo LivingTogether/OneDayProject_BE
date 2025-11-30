@@ -1,5 +1,6 @@
 package com.knuaf.oneday.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,11 +42,17 @@ public class User {
 
     @Column(name ="major_gpa")//전공 평균 학점
     private Double majorgpa = 0.0;
+    @Column(name="eng_score")
+    private Long eng_score;
+    @Column(name="internship")
+    private boolean internship;
 
     // 양방향 매핑 (선택)
+    @JsonIgnore
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private Advcomp advComp;
 
+    @JsonIgnore
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
     private GlobalSW globalSW;
 
@@ -58,9 +65,6 @@ public class User {
     public void updateMajorCredit(int credit) {
         this.major_credit = Long.valueOf(credit);
     }
-
-    private Long eng_score;
-    private boolean internship;
     public void setId(Long idx) {
         this.idx = idx;
     }

@@ -25,9 +25,20 @@ public class SecurityConfig {
                 .cors(cors->cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers("/api/auth/login",
+                                            "/api/auth/signup",
+                                            "/api/auth/home"
+                        ).permitAll()
                         //.requestMatchers("/signup", "/login", "/").permitAll()
-                        //.anyRequest().authenticated()
+                        .anyRequest().authenticated()
+                )
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authExceoption) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write("{\"message\":\"로그인이 필요합니다\"}");
+                        })
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/api/auth/login")

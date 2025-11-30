@@ -2,6 +2,7 @@ package com.knuaf.oneday.controller;
 
 import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.dto.SignupRequest;
+import com.knuaf.oneday.dto.UserUpdateDto;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -67,41 +68,14 @@ public class UserController {
             return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
         }
     }
-/* //로그인 경로 우회 X
+ //로그인 경로 우회 X
     @GetMapping("/mypage")
-    public String showMyPage(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        if (userDetails == null) {
-            return "redirect:/login"; // 로그인 안 했으면 로그인 창으로
-        }
-        else {
-            User user = new User();
-            user.setUserId("guest"); // 아이디: guest
-            user.setStudentId(2022000000); // 학번: 0
-            user.setMajor("글로벌소프트웨어융합전공"); // 전공: 임시값
-            user.setSpecific_major("세부 트랙"); // 세부전공: 안내 메시지
-
-            // 점수 등 숫자 필드도 null이면 에러날 수 있으니 0으로 초기화
-            user.setEng_score(0L);
-            user.setTotal_credit(0L);
-            user.setGeneral_credit(0L);
-            user.setMajor_credit(0L);
-            user.setInternship(false);
-        }
-
-        // HTML로 user 객체 전달
-        model.addAttribute("user", user);
-
-        return "mypage";
-    }
-        // DB에서 내 정보 가져오기
+    public ResponseEntity<User> showMyPage(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getMyInfo(userDetails.getUsername());
 
-        // HTML로 데이터 전달 ("user"라는 이름으로 사용 가능)
-        model.addAttribute("user", user);
-
-        return "mypage"; // templates/mypage.html 파일을 찾아감
+        return ResponseEntity.ok(user); // templates/mypage.html 파일을 찾아감
     }
-*/
+/*
 @GetMapping("/mypage")
 @ResponseBody
 public ResponseEntity<User> showMyPage(@AuthenticationPrincipal UserDetails userDetails) {
@@ -119,7 +93,6 @@ public ResponseEntity<User> showMyPage(@AuthenticationPrincipal UserDetails user
         user.setMajor("글로벌소프트웨어융합전공");
 
         // 엔티티 필드명에 맞춰서 setter 사용 (User 엔티티 필드명 확인 필요)
-        // 예: setSpecificMajor 인지 setSpecific_major 인지 확인하세요.
         // 보통 자바는 CamelCase(specificMajor)를 씁니다.
         try {
             // 엔티티 필드명이 스네이크케이스라면 이렇게, 카멜케이스라면 setSpecificMajor
@@ -139,18 +112,25 @@ public ResponseEntity<User> showMyPage(@AuthenticationPrincipal UserDetails user
     user.setPassword("");
 
     return ResponseEntity.ok(user);
-}
+}*/
 
     // ✅ 2. 마이페이지 정보 수정 처리 (POST)
     @PostMapping("/mypage/update")
     @ResponseBody
     public ResponseEntity<String> updateMyPage(
             @AuthenticationPrincipal UserDetails userDetails,
-            @ModelAttribute MypageRequest updateDto) { // @RequestBody -> @ModelAttribute 변경
+            @RequestBody UserUpdateDto updateDto) { // @RequestBody -> @ModelAttribute 변경
 
-        if(userDetails != null) {
+        if(userDetails == null) {
             return ResponseEntity.status(401).body("로그인이 필요합니다.");
         }
+
+        System.out.println("Update Request 도착:");
+        System.out.println("User ID: " + userDetails.getUsername());
+        System.out.println("Specific Major: " + updateDto.getSpecific_major());
+        System.out.println("Eng Score: " + updateDto.getEng_score());
+        System.out.println("Internship: " + updateDto.getInternship());
+
         // 서비스 호출하여 정보 수정
         userService.updateUserInfo(userDetails.getUsername(), updateDto);
 
