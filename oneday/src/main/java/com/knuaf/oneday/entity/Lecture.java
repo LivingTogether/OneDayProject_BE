@@ -14,8 +14,8 @@ public class Lecture {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(name = "lec_num")
-    private String lecNum;      // 과목번호 (핵심 검색 키)
+    @Column(name = "lec_id")
+    private String lecId;      // 과목번호 (핵심 검색 키)
 
     @Column(name = "lec_name")
     private String lecName;
@@ -31,6 +31,6 @@ public class Lecture {
     private String language;
 
     // grade는 강의 목록에서는 '대상 학년'으로 쓰일 것 같네요.
-    private String grade;
+    private Integer grade;
 
 }

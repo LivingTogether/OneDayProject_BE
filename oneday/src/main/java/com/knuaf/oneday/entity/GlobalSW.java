@@ -38,4 +38,6 @@ public class GlobalSW {
     public void updateCredits(int multiple) {
         this.multipleMajor = multiple;
     }
+    public void updateEntreLecture(int entreLecture) {this.entreLecture = entreLecture;}
+    public void updateOverseasCredits(int overseasCredits) {this.overseasCredits = overseasCredits;}
 }

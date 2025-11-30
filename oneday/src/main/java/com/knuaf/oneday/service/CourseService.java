@@ -10,6 +10,7 @@ import com.knuaf.oneday.repository.LectureRepository;
 import com.knuaf.oneday.repository.UserAttendRepository;
 import com.knuaf.oneday.repository.UserRepository;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,16 +34,27 @@ public class CourseService {
 
         String tableName = "lecture_list";
 
-        // ★ 2. 쿼리 파라미터에 자른 ID(realLecId) 사용
-        String sql = "SELECT * FROM " + tableName + " WHERE lec_num = :lecId"; // 아까 고친 lec_num
+        // 쿼리 작성 (파라미터 이름을 :lecture로 통일)
+        String sql = "SELECT * FROM " + tableName + " WHERE lec_id = :lecture";
+        System.out.println("4. 실행될 SQL: " + sql);
 
         Lecture lecture = null;
         try {
             lecture = (Lecture) em.createNativeQuery(sql, Lecture.class)
-                    .setParameter("lecId", parseLecId(request.getLecId())) // ★ 여기도 realLecId 넣기
+                    // [중요] SQL의 :lecture 와 이름을 정확히 맞춰야 함
+                    // 만약 잘라낸 ID를 써야 한다면 request.getLecId() 대신 변수명(realLecId)을 넣으세요.
+                    .setParameter("lecture", request.getLecId())
                     .getSingleResult();
+
+        } catch (NoResultException e) {
+            // DB에 데이터가 없을 때 발생하는 전용 에러
+            throw new IllegalArgumentException("해당 학기에 존재하지 않는 과목입니다. (ID: " + request.getLecId() + ")");
+
         } catch (Exception e) {
-            throw new IllegalArgumentException("해당 학기에 존재하지 않는 과목입니다.");
+            // 문법 오류나 파라미터 바인딩 오류 등 기타 에러
+            System.err.println(">> [치명적 에러] SQL 실행 중 문제가 발생했습니다.");
+            e.printStackTrace(); // ★ 콘솔에 빨간색으로 상세 에러 로그를 출력함
+            throw new IllegalArgumentException("시스템 에러 발생: " + e.getMessage());
         }
         if (userAttendRepository.existsByStudentIdAndLecId(studentId, request.getLecId())) {
             throw new IllegalArgumentException("이미 수강 신청한 과목입니다.");
