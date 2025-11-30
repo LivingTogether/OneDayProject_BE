@@ -104,14 +104,14 @@ public class GSWGraduationCheckService {
         if (criteria.getEntreLecture() > 0) {
             if (!addCheckItem(items, "[트랙] 창업교과목", entre, criteria.getEntreLecture())) allPassed = false;
         }
-
+/**
         // [C] 스타트업 창업 (다중전공 필수)
         if (track == Track.MULTI_MAJOR) {
             boolean passStartup = startup > 0;
             items.add(CheckItem.builder().category("[트랙] 스타트업 창업").current(startup).required(1).isPassed(passStartup).message(passStartup ? "창업완료" : "미창업").build());
             if (!passStartup) allPassed = false;
         }
-
+**/
         // [D] 현장실습 (다중전공, 학석사 필수)
         if (track == Track.MULTI_MAJOR || track == Track.MASTER_LINK) {
             boolean isInternship = user.isInternship();
