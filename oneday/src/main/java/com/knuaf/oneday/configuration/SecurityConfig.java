@@ -73,7 +73,8 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // 프론트엔드 주소 허용 (localhost:5173)
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("http://localhost:5173",
+         "https://one-day-project-fe-4z4t.vercel.app"));
         // 허용할 HTTP 메서드 (GET, POST 등)
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         // 허용할 헤더

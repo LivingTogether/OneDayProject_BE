@@ -40,4 +40,6 @@ public class GlobalSW {
         this.multipleMajor = multiple;
         this.designLecture = design;
     }
+    public void updateEntreLecture(int entreLecture) {this.entreLecture = entreLecture;}
+    public void updateOverseasCredits(int overseasCredits) {this.overseasCredits = overseasCredits;}
 }

@@ -37,9 +37,9 @@ public class GraduationController {
                 .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
 
         Long studentId = user.getStudentId();
-
+        String userName = user.getName();
         // 3. 찾은 studentId로 기존 로직 수행
-        GraduationCheckResponse response = integratedService.checkGraduation(studentId);
+        GraduationCheckResponse response = integratedService.checkGraduation(studentId,userName);
 
         return ResponseEntity.ok(response);
     }

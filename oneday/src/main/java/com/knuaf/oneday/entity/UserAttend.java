@@ -50,11 +50,11 @@ public class UserAttend {
         this.studentId = studentId;
         this.receivedGrade = receivedGrade;
         // Lecture에서 정보 복사
-        this.lecId = lecture.getLecNum();
+        this.lecId = lecture.getLecId();
         this.lecName = lecture.getLecName();
         this.credit = lecture.getCredit();
-        this.grade = getGrade();
-        this.semester = getSemester();
+        this.grade = grade;
+        this.semester = semester;
 
         if (lecType != null && !lecType.isEmpty()) {
             this.lecType = lecType;

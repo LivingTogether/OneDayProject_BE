@@ -11,11 +11,12 @@ public class LectureResponseDto {
     private String lectureName; // 강의명
     private String lectureType;
     private Integer credit;     // 학점
+    //private Float receivedGrade;
 
     // Entity -> DTO 변환 메서드 (편의상 추가)
     public static LectureResponseDto from(Lecture lecture) {
         return LectureResponseDto.builder()
-                .lecId(lecture.getLecNum()) // Entity 필드명에 맞게 수정 필요
+                .lecId(lecture.getLecId()) // Entity 필드명에 맞게 수정 필요
                 .lectureName(lecture.getLecName())
                 .lectureType(lecture.getLecType())
                 .credit(lecture.getCredit())

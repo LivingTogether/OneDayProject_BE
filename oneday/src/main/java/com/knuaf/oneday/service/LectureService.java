@@ -79,7 +79,7 @@ public class LectureService {
 
         // 4. DB에서 조회 (WHERE lec_num IN (...))
         // JPA Native Query로 'IN' 절 사용하기
-        String sql = "SELECT * FROM " + tableName + " WHERE lec_num IN (:ids)";
+        String sql = "SELECT * FROM " + tableName + " WHERE lec_id IN (:ids)";
 
         try {
             List<Lecture> resultList = em.createNativeQuery(sql, Lecture.class)
@@ -102,7 +102,7 @@ public class LectureService {
     // ========================================================
     private List<String> getTargetLectureIds(String major, int grade, int term) {
         List<String> ids = new ArrayList<>();
-        if("심화컴퓨팅전공".equals(major) || "플랫폼".equals(major)) {
+        if("심화컴퓨팅전공".equals(major) || "플랫폼SW융합전공".equals(major)) {
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0045");

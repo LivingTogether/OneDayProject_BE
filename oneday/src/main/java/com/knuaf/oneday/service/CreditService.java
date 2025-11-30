@@ -3,16 +3,19 @@ package com.knuaf.oneday.service;
 import com.knuaf.oneday.entity.*;
 import com.knuaf.oneday.repository.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CreditService {
 
     private final UserRepository userRepository;
     private final UserAttendRepository userAttendRepository;
+    private final StartUpRepository startupCourseRepository;
     private final AdvCompRepository advRepo;
     private final GlobalSWRepository globRepo;
     //private final AICompRepository aiRepo;
@@ -34,6 +37,11 @@ public class CreditService {
             calculateForAIComputing(user, allAttends);
         }
     }
+    @Transactional(readOnly = true) // 조회만 하므로 읽기 전용 트랜잭션 권장
+    public boolean isStartupCourse(String lectureId) {
+        return startupCourseRepository.existsByLecId(lectureId);
+    }
+
 
     private void calculateForAdvComputing(User user, List<UserAttend> attends) {
         int abeekGen = 0, baseMaj = 0, enginMaj = 0, etcSum = 0;
@@ -49,7 +57,6 @@ public class CreditService {
             String type = attend.getLecType();
             int credit = attend.getCredit();
             Float grade0bj = attend.getReceivedGrade();
-
             if ("기본소양".equals(type)) abeekGen += credit;
             else if ("전공기반".equals(type)) {
                 baseMaj += credit;
@@ -100,20 +107,26 @@ public class CreditService {
 
     private void calculateForGlobSw(User user, List<UserAttend> attends) {
         int majorSum = 0, generalSum = 0, multipleSum = 0, etcSum = 0;
+        int startup = 0, oversea = 0;
+        int designlecture = 0;
 
+        int baseCredit = 3;
         double sumTotalScore = 0.0;
         int calcTotalCredit = 0;
 
         double sumMajorScore = 0.0;
         int calcMajorCredit = 0;
 
-        int designlecture = 0;
-
         for (UserAttend attend : attends) {
             String type = attend.getLecType();
             int credit = attend.getCredit();
             String design = attend.getLecId();
             Float grade0bj = attend.getReceivedGrade();
+            if(isStartupCourse(attend.getLecId())) {
+                startup += baseCredit;
+                log.info("창업교과목: {}", attend.getLecId());
+            }
+            if("EN".equals(attend.getLanguage())) oversea++;
 
             if ("전공필수".equals(type)) majorSum += credit;
             else if ("교양".equals(type)) generalSum += credit;
@@ -131,6 +144,7 @@ public class CreditService {
             if(design.equals("ITEC0401")||design.equals("ITEC0402")){
                 designlecture += credit;
             }
+
             if(grade0bj != null){
                 Float grade = grade0bj;
 
@@ -144,6 +158,7 @@ public class CreditService {
             }
         }
 
+
         // ★ [핵심] 유저 객체를 통해 확인
         GlobalSW glob = user.getGlobalSW();
 
@@ -151,8 +166,9 @@ public class CreditService {
             glob = new GlobalSW(user);
             globRepo.save(glob);
         }
-
-        glob.updateCredits(multipleSum,designlecture);
+        glob.updateOverseasCredits(oversea);
+        glob.updateEntreLecture(startup);
+        glob.updateCredits(multipleSum, designlecture);
         updateUserEntity(user, generalSum, majorSum,
                 multipleSum + generalSum + majorSum + etcSum,
                         sumTotalScore, calcTotalCredit, sumMajorScore, calcMajorCredit);

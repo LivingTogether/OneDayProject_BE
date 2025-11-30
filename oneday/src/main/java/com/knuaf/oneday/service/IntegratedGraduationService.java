@@ -19,7 +19,7 @@ public class IntegratedGraduationService {
     private final AIGraduationService aiService;           // 인공지능
 
     @Transactional(readOnly = true)
-    public GraduationCheckResponse checkGraduation(Long studentId) {
+    public GraduationCheckResponse checkGraduation(Long studentId, String userName) {
 
         // 1. 유저 정보 조회
         User user = userRepository.findByStudentId(studentId)
@@ -72,7 +72,8 @@ public class IntegratedGraduationService {
 
         // 3. 결과 DTO에 최종 전공 이름 설정
         response.setMajorType(majorTypeName);
-        log.info("학번: {}, 전공: {}, 세부: {}, 최종판정: {}", studentId, major, specificMajor, majorTypeName);
+        response.setUserName(userName);
+        log.info("이름: {},학번: {}, 전공: {}, 세부: {}, 최종판정: {}", userName,studentId, major, specificMajor, majorTypeName);
 
         return response;
     }

@@ -13,6 +13,7 @@ public class GraduationCheckResponse {
     // ★ 추가: 적용된 전공 트랙 이름 (예: "글로벌SW-융합전공", "심화컴퓨터공학")
     private String majorType;
 
+    private String userName;
     private Long studentId;
     private boolean isGraduationPossible;
     private List<CheckItem> checkList;
