@@ -108,6 +108,7 @@ public class CreditService {
     private void calculateForGlobSw(User user, List<UserAttend> attends) {
         int majorSum = 0, generalSum = 0, multipleSum = 0, etcSum = 0;
         int startup = 0, oversea = 0;
+        int designlecture = 0;
 
         int baseCredit = 3;
         double sumTotalScore = 0.0;
@@ -119,6 +120,7 @@ public class CreditService {
         for (UserAttend attend : attends) {
             String type = attend.getLecType();
             int credit = attend.getCredit();
+            String design = attend.getLecId();
             Float grade0bj = attend.getReceivedGrade();
             if(isStartupCourse(attend.getLecId())) {
                 startup += baseCredit;
@@ -138,6 +140,10 @@ public class CreditService {
             else if ("부전공".equals(type)) multipleSum += credit;
             else if ("융합전공".equals(type)) multipleSum += credit;
             else etcSum += credit;
+
+            if(design.equals("ITEC0401")||design.equals("ITEC0402")){
+                designlecture += credit;
+            }
 
             if(grade0bj != null){
                 Float grade = grade0bj;
@@ -161,7 +167,7 @@ public class CreditService {
         }
         glob.updateOverseasCredits(oversea);
         glob.updateEntreLecture(startup);
-        glob.updateCredits(multipleSum);
+        glob.updateCredits(multipleSum, designlecture);
         updateUserEntity(user, generalSum, majorSum,
                 multipleSum + generalSum + majorSum + etcSum,
                         sumTotalScore, calcTotalCredit, sumMajorScore, calcMajorCredit);

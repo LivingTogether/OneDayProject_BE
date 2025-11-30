@@ -35,8 +35,10 @@ public class GlobalSW {
         this.user = user;
     }
 
-    public void updateCredits(int multiple) {
+    public void updateCredits(int multiple, int design) {
+
         this.multipleMajor = multiple;
+        this.designLecture = design;
     }
     public void updateEntreLecture(int entreLecture) {this.entreLecture = entreLecture;}
     public void updateOverseasCredits(int overseasCredits) {this.overseasCredits = overseasCredits;}
