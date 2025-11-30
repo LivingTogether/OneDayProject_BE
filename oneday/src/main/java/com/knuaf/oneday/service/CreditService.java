@@ -107,9 +107,12 @@ public class CreditService {
         double sumMajorScore = 0.0;
         int calcMajorCredit = 0;
 
+        int designlecture = 0;
+
         for (UserAttend attend : attends) {
             String type = attend.getLecType();
             int credit = attend.getCredit();
+            String design = attend.getLecId();
             Float grade0bj = attend.getReceivedGrade();
 
             if ("전공필수".equals(type)) majorSum += credit;
@@ -125,6 +128,9 @@ public class CreditService {
             else if ("융합전공".equals(type)) multipleSum += credit;
             else etcSum += credit;
 
+            if(design.equals("ITEC0401")||design.equals("ITEC0402")){
+                designlecture += credit;
+            }
             if(grade0bj != null){
                 Float grade = grade0bj;
 
@@ -146,7 +152,7 @@ public class CreditService {
             globRepo.save(glob);
         }
 
-        glob.updateCredits(multipleSum);
+        glob.updateCredits(multipleSum,designlecture);
         updateUserEntity(user, generalSum, majorSum,
                 multipleSum + generalSum + majorSum + etcSum,
                         sumTotalScore, calcTotalCredit, sumMajorScore, calcMajorCredit);
