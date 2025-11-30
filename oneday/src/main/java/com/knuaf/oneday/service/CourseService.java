@@ -39,7 +39,7 @@ public class CourseService {
         Lecture lecture = null;
         try {
             lecture = (Lecture) em.createNativeQuery(sql, Lecture.class)
-                    .setParameter("lecId", request.getLecId()) // ★ 여기도 realLecId 넣기
+                    .setParameter("lecId", parseLecId(request.getLecId())) // ★ 여기도 realLecId 넣기
                     .getSingleResult();
         } catch (Exception e) {
             throw new IllegalArgumentException("해당 학기에 존재하지 않는 과목입니다.");
