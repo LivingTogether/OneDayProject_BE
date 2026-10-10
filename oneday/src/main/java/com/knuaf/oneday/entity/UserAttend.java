@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-@Table(name = "user_attend")
+@Table(name = "user_attend", uniqueConstraints = {
+        // 같은 학생이 같은 과목을 중복 등록하지 못하도록 DB 레벨에서 보장 (#65)
+        @UniqueConstraint(name = "uk_user_attend_student_lec", columnNames = {"student_id", "lec_id"})
+})
 public class UserAttend {
 
     @Id
