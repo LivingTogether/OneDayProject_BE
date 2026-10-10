@@ -1,5 +1,6 @@
 package com.knuaf.oneday.entity;
 
+import com.knuaf.oneday.exception.BusinessException;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +26,7 @@ class MajorCodeTest {
     void 알_수_없는_전공은_예외() {
         assertThat(MajorCode.find("경영학과")).isEmpty();
         assertThatThrownBy(() -> MajorCode.from("경영학과"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("전공 정보가 올바르지 않습니다");
     }
 }

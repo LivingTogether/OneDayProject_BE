@@ -1,6 +1,8 @@
 package com.knuaf.oneday.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper; // JSON 변환기
+import com.knuaf.oneday.exception.ErrorCode;
+import com.knuaf.oneday.exception.ErrorResponse;
 import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.context.annotation.Bean;
@@ -14,11 +16,26 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.io.IOException;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final ObjectMapper objectMapper;
+
+    public SecurityConfig(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    // 시큐리티 필터 단계의 인증 오류도 공통 에러 응답 형식으로 내려준다.
+    private void writeError(HttpServletResponse response, ErrorCode errorCode) throws IOException {
+        response.setStatus(errorCode.getStatus().value());
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        objectMapper.writeValue(response.getWriter(), ErrorResponse.of(errorCode));
+    }
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -33,12 +50,8 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint((request, response, authExceoption) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            response.setCharacterEncoding("UTF-8");
-                            response.getWriter().write("{\"message\":\"로그인이 필요합니다\"}");
-                        })
+                        .authenticationEntryPoint((request, response, authException) ->
+                                writeError(response, ErrorCode.UNAUTHORIZED))
                 )
                 .formLogin(formLogin -> formLogin
                         .loginPage("/api/auth/login")
@@ -50,12 +63,8 @@ public class SecurityConfig {
                             response.setCharacterEncoding("UTF-8");
                             response.getWriter().write("{\"message\": \"login success\"}");
                         })
-                        .failureHandler((request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // 401 Error
-                            response.setContentType("application/json");
-                            response.setCharacterEncoding("UTF-8");
-                            response.getWriter().write("{\"message\": \"login failed\"}");
-                        })
+                        .failureHandler((request, response, exception) ->
+                                writeError(response, ErrorCode.LOGIN_FAILED))
                         .permitAll()
                 )
                 .logout(logout -> logout

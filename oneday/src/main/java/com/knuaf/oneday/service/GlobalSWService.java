@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.GlobalSWRequest;
 import com.knuaf.oneday.dto.GlobalSWResponse;
 import com.knuaf.oneday.entity.GlobalSW;
@@ -18,7 +20,7 @@ public class GlobalSWService {
     // 1. 생성
     public Long create(GlobalSWRequest request) {
         if (globalSWRepository.existsByUser_StudentId(request.getStudentId())) {
-            throw new IllegalArgumentException("이미 등록된 학번입니다.");
+            throw new BusinessException(ErrorCode.TRACK_INFO_ALREADY_EXISTS);
         }
         return globalSWRepository.save(request.toEntity()).getUser().getStudentId();
     }
@@ -27,14 +29,14 @@ public class GlobalSWService {
     @Transactional(readOnly = true)
     public GlobalSWResponse getInfo(Long studentId) {
         GlobalSW entity = globalSWRepository.findByUser_StudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRACK_INFO_NOT_FOUND));
         return GlobalSWResponse.from(entity);
     }
 
     // 3. 수정 (Patch: 일부 필드만 수정)
     public void update(Long studentId, GlobalSWRequest request) {
         GlobalSW entity = globalSWRepository.findByUser_StudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRACK_INFO_NOT_FOUND));
 
         // null이 아닌 값만 업데이트
         if (request.getOverseasCredits() != null) entity.setOverseasCredits(request.getOverseasCredits());
@@ -47,7 +49,7 @@ public class GlobalSWService {
     // 4. 삭제
     public void delete(Long studentId) {
         if (!globalSWRepository.existsByUser_StudentId(studentId)) {
-            throw new IllegalArgumentException("삭제할 정보가 없습니다.");
+            throw new BusinessException(ErrorCode.TRACK_INFO_NOT_FOUND);
         }
         globalSWRepository.deleteByUser_StudentId(studentId);
     }

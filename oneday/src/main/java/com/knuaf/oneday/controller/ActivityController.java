@@ -1,5 +1,7 @@
 package com.knuaf.oneday.controller;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.ActivityDto;
 import com.knuaf.oneday.service.ActivityService;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +25,7 @@ public class ActivityController {
     @GetMapping
     public ResponseEntity<List<ActivityDto.Response>> getActivities(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(401).build(); // 로그인 안됨
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         return ResponseEntity.ok(activityService.getMyActivities(userDetails.getUsername()));
     }

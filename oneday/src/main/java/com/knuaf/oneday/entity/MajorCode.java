@@ -1,5 +1,8 @@
 package com.knuaf.oneday.entity;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
+
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
@@ -51,7 +54,7 @@ public enum MajorCode {
     }
 
     public static MajorCode from(String value) {
-        return find(value).orElseThrow(() ->
-                new IllegalArgumentException("전공 정보가 올바르지 않습니다. (현재값: " + (value == null ? "" : value.trim()) + ")"));
+        return find(value).orElseThrow(() -> new BusinessException(ErrorCode.INVALID_MAJOR,
+                "전공 정보가 올바르지 않습니다. (현재값: " + (value == null ? "" : value.trim()) + ")"));
     }
 }

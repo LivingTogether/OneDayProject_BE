@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.GraduationCheckResponse;
 import com.knuaf.oneday.component.GraduationRules;
 import com.knuaf.oneday.dto.GraduationCheckResponse.CheckItem;
@@ -36,7 +38,7 @@ public class AdvGraduationCheckService {
 
         // 1. 정보 조회
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("User 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         // 아직 ABEEK 이수 정보가 없으면 0학점으로 판정
         Advcomp adv = advcompRepository.findByUser_StudentId(studentId)
                 .orElseGet(Advcomp::new);

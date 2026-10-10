@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.AdvcompRequest;
 import com.knuaf.oneday.dto.AdvcompResponse;
 import com.knuaf.oneday.entity.Advcomp;
@@ -18,7 +20,7 @@ public class AdvcompService {
     // 1. 생성 (Create)
     public Long create(AdvcompRequest request) {
         if (advcompRepository.existsByUser_StudentId(request.getStudentId())) {
-            throw new IllegalArgumentException("이미 등록된 학번입니다.");
+            throw new BusinessException(ErrorCode.TRACK_INFO_ALREADY_EXISTS);
         }
         return advcompRepository.save(request.toEntity()).getUser().getStudentId();
     }
@@ -27,14 +29,14 @@ public class AdvcompService {
     @Transactional(readOnly = true)
     public AdvcompResponse getInfo(Long studentId) {
         Advcomp entity = advcompRepository.findByUser_StudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRACK_INFO_NOT_FOUND));
         return AdvcompResponse.from(entity);
     }
 
     // 3. 수정 (Patch) - 값이 있는 것만 수정
     public void update(Long studentId, AdvcompRequest request) {
         Advcomp entity = advcompRepository.findByUser_StudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRACK_INFO_NOT_FOUND));
 
         // DTO(카멜) -> Entity(스네이크) 매핑하면서 null 체크
         if (request.getAbeekGeneral() != null) entity.setAbeek_general(request.getAbeekGeneral());
@@ -46,7 +48,7 @@ public class AdvcompService {
     // 4. 삭제 (Delete)
     public void delete(Long studentId) {
         if (!advcompRepository.existsByUser_StudentId(studentId)) {
-            throw new IllegalArgumentException("삭제할 정보가 없습니다.");
+            throw new BusinessException(ErrorCode.TRACK_INFO_NOT_FOUND);
         }
         advcompRepository.deleteByUser_StudentId(studentId);
     }

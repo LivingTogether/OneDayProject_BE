@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.component.GraduationRules;
 import com.knuaf.oneday.dto.GraduationCheckResponse;
 import com.knuaf.oneday.dto.GraduationCheckResponse.CheckItem;
@@ -31,7 +33,7 @@ public class SimpleGraduationService {
 
         // 1. User 정보 조회
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         long studentId = user.getStudentId();
         int entryYear = (int) (studentId / 1000000); // 학번 앞 4자리 (입학년도)

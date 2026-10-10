@@ -1,5 +1,7 @@
 package com.knuaf.oneday.controller;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.dto.SignupRequest;
 import com.knuaf.oneday.dto.UserUpdateDto;
@@ -59,14 +61,9 @@ public class UserController {
 
     @PostMapping("/signup")
     public ResponseEntity<String> registerUser(@RequestBody SignupRequest request){
-        try {
-            userService.register(request);
-            // 성공 시 200 OK와 메시지 전달
-            return ResponseEntity.ok("회원가입이 완료되었습니다.");
-        } catch (Exception e) {
-            // 실패 시(예: 중복 ID 등) 400 Bad Request 전달
-            return ResponseEntity.badRequest().body("회원가입 실패: " + e.getMessage());
-        }
+        // 실패 시 GlobalExceptionHandler가 처리 (알 수 없는 전공 400, 아이디·학번 중복 409)
+        userService.register(request);
+        return ResponseEntity.ok("회원가입이 완료되었습니다.");
     }
  //로그인 경로 우회 X
     @GetMapping("/mypage")
@@ -122,7 +119,7 @@ public ResponseEntity<User> showMyPage(@AuthenticationPrincipal UserDetails user
             @RequestBody UserUpdateDto updateDto) { // @RequestBody -> @ModelAttribute 변경
 
         if(userDetails == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         System.out.println("Update Request 도착:");

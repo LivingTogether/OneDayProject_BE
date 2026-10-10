@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.GraduationCheckResponse;
 import com.knuaf.oneday.entity.MajorCode;
 import com.knuaf.oneday.entity.User;
@@ -24,7 +26,7 @@ public class IntegratedGraduationService {
 
         // 1. 유저 정보 조회
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 학번의 학생 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 전공 코드로 변환 (알 수 없는 전공이면 예외)
         MajorCode majorCode = MajorCode.from(user.getMajor());

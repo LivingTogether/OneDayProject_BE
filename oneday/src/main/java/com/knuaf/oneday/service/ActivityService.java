@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.entity.Activity;
 import com.knuaf.oneday.repository.ActivityRepository;
 import com.knuaf.oneday.dto.ActivityDto;
@@ -25,7 +27,7 @@ public class ActivityService {
     // 1. 활동 추가
     public void createActivity(String userId, ActivityDto.Request request) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Activity activity = new Activity(
                 request.getCategory(),
@@ -41,7 +43,7 @@ public class ActivityService {
     @Transactional(readOnly = true)
     public List<ActivityDto.Response> getMyActivities(String userId) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(()->new IllegalArgumentException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(()->new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return activityRepository.findByUser_StudentId(user.getStudentId()).stream()
                 .map(a ->new ActivityDto.Response(
@@ -56,11 +58,11 @@ public class ActivityService {
     // 3. 활동 수정
     public void updateActivity(String userId, Long activityId, ActivityDto.Request request) {
         Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 활동 내역이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACTIVITY_NOT_FOUND));
 
         // 본인의 활동인지 검증
         if (!activity.getUser().getUserId().equals(userId)) {
-            throw new IllegalArgumentException("수정 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "수정 권한이 없습니다.");
         }
 
         activity.setCategory(request.getCategory());
@@ -73,10 +75,10 @@ public class ActivityService {
     // 4. 활동 삭제
     public void deleteActivity(String userId, Long activityId) {
         Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 활동 내역이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.ACTIVITY_NOT_FOUND));
 
         if (!activity.getUser().getUserId().equals(userId)) {
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+            throw new BusinessException(ErrorCode.FORBIDDEN, "삭제 권한이 없습니다.");
         }
 
         activityRepository.delete(activity);

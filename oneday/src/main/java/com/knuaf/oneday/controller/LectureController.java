@@ -1,16 +1,16 @@
 package com.knuaf.oneday.controller;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.LectureResponseDto;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.repository.UserRepository;
 import com.knuaf.oneday.service.CourseService;
 import com.knuaf.oneday.service.LectureService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -26,13 +26,13 @@ public class LectureController {
     // 내부 헬퍼 메서드
     private String getMajor(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         String loginId = authentication.getName();
 
         User user = userRepository.findByUserId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         return user.getMajor();
     }
@@ -53,13 +53,7 @@ public class LectureController {
             @RequestParam int grade,
             @RequestParam int semester
     ) {
-        String major;
-        try {
-            major = getMajor(authentication);
-        } catch (ResponseStatusException e) {
-            // 로그인이 안 된 경우 401 에러를 바로 반환 (서버가 죽지 않음)
-            return ResponseEntity.status(e.getStatusCode()).build();
-        }
+        String major = getMajor(authentication);
 
         List<LectureResponseDto> standardList = lectureService.getStandardCourses(major, grade, semester);
         return ResponseEntity.ok(standardList);

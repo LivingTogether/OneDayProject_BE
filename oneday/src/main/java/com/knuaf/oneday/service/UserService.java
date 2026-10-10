@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.SignupRequest;
 import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.dto.UserUpdateDto;
@@ -98,13 +100,13 @@ public class UserService implements UserDetailsService {
     // 3. 내 정보 조회
     public User getMyInfo(String userId) {
         return userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     // 4. 내 정보 수정
     public User updateUserInfo(String userId, UserUpdateDto request) {
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (request.getSpecific_major() != null) {
             user.setSpecific_major(request.getSpecific_major());
@@ -123,7 +125,7 @@ public class UserService implements UserDetailsService {
     //5. 회원탈퇴
     public void deleteUser(String userId){
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         //advcomp 테이블 데이터 삭제
         advcompRepository.deleteByUser_StudentId(user.getStudentId());
