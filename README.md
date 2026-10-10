@@ -110,3 +110,11 @@
 ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
 ![Notion](https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white)
 ![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)
+
+## 프로젝트 종료 후 개선 기록
+> 팀 프로젝트는 **2025-11-30** 마지막 커밋으로 종료되었습니다.
+> 아래 항목은 그 이후(**2026-10~**) 개인적으로 진행한 개선 작업이며, 프로젝트 기간 중 작업과 구분하기 위해 따로 기록합니다.
+
+| 날짜 | 이슈 | 내용 | 개선 전 → 후 |
+|---|---|---|---|
+| 2026-10-10 | #58 | DB 접속 정보 환경변수 분리 | 설정 파일·스크립트에 비밀번호 평문 커밋 → 환경변수 주입 (`.env.example` 제공) |
