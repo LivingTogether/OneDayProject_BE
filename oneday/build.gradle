@@ -56,4 +56,6 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+    // ./gradlew test -DupdateSnapshot=true 로 졸업 규칙 스냅샷을 다시 생성
+    systemProperty 'updateSnapshot', System.getProperty('updateSnapshot', 'false')
 }
