@@ -73,7 +73,7 @@ public class CreditService {
             else if ("전공기초".equals(type)) major += credit;
             else if ("교양필수".equals(type)) general += credit;
             else if ("교양선택".equals(type)) general += credit;
-            else if ("일반선택".equals(type)) etcSum += credit;
+            else etcSum += credit; // 일반선택·다중전공 등은 총 이수학점에만 포함
             //else if ("다중전공".equals(type)) multipleSum += credit;
            // else if ("복수전공".equals(type)) multipleSum += credit;
            // else if ("부전공".equals(type)) multipleSum += credit;
@@ -101,8 +101,9 @@ public class CreditService {
 
         adv.updateCredits(abeekGen, baseMaj, enginMaj);
 
-        updateUserEntity(user, abeekGen + general, baseMaj + enginMaj + major,
-                abeekGen + baseMaj + enginMaj + etcSum + general + major,
+        // major에는 이미 전공기반·공학전공 학점이 포함되어 있으므로 다시 더하지 않는다.
+        updateUserEntity(user, abeekGen + general, major,
+                abeekGen + general + major + etcSum,
                 sumTotalScore, calcTotalCredit, sumMajorScore, calcMajorCredit);
     }
 
