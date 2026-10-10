@@ -30,7 +30,7 @@ public class CourseService {
     // [등록] registerCourse
     @Transactional
     public void registerCourse(Long studentId, CourseRegisterDto request) {
-
+        lockUser(studentId);
 
         String tableName = "lecture_list";
 
@@ -76,6 +76,7 @@ public class CourseService {
     // [수정] updateCourseGrade
     @Transactional
     public void updateCourseGrade(Long studentId, CourseUpdateDto request) {
+        lockUser(studentId);
 
         // ★ 2. 조회할 때 자른 ID 사용
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, request.getLecId())
@@ -93,12 +94,20 @@ public class CourseService {
     // [삭제] deleteCourse
     @Transactional
     public void deleteCourse(Long studentId, String rawLecId) {
+        lockUser(studentId);
 
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, rawLecId)
                 .orElseThrow(() -> new IllegalArgumentException("삭제할 수강 내역이 없습니다."));
 
        userAttendRepository.delete(userAttend);
         creditService.recalculateTotalCredits(studentId);
+    }
+
+    // 학점 합계는 수강 이력 전체를 다시 읽어 계산하므로, 같은 학생의 요청이 동시에 들어오면
+    // 서로의 변경을 보지 못하고 합계를 덮어쓸 수 있다. 유저 행을 먼저 잠가 순서대로 처리한다. (#66)
+    private void lockUser(Long studentId) {
+        userRepository.findByStudentIdForUpdate(studentId)
+                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
     }
 
     private String parseLecId(String rawId) {
