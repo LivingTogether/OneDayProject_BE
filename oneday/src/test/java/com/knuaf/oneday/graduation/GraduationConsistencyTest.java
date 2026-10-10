@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * 간단 조회(/api/graduation/simple)와 상세 조회(/api/graduation/my-status)의
  * "학점 요건 충족" 판정이 서로 다른 케이스를 찾습니다. (#59)
+ * 졸업 규칙 단일화(#60) 이전에는 126건 중 60건이 어긋났습니다.
  * 영어·현장실습·필수과목처럼 간단 조회가 다루지 않는 항목은 비교에서 제외합니다.
  */
 class GraduationConsistencyTest extends IntegrationTestSupport {
@@ -28,8 +29,6 @@ class GraduationConsistencyTest extends IntegrationTestSupport {
     private static final List<String> MAJORS =
             List.of("심화컴퓨팅전공", "플랫폼SW융합전공", "글로벌SW융합전공", "인공지능컴퓨팅전공");
 
-    /** 알려진 불일치 건수 — #60(졸업 규칙 단일화)에서 0으로 만들 대상 */
-    private static final int KNOWN_MISMATCHES = 60;
 
     @Autowired
     private UserService userService;
@@ -57,7 +56,7 @@ class GraduationConsistencyTest extends IntegrationTestSupport {
                     }
                     String key = major + "|" + year + "|" + specific;
 
-                    Map<String, Integer> required = requiredCredits(studentId, major);
+                    Map<String, Integer> required = requiredCredits(studentId);
                     for (State state : State.values()) {
                         if (state == State.MAJOR_WITHOUT_ABEEK && !required.containsKey("[ABEEK] 공학전공")) continue;
                         applyState(studentId, required, state);
@@ -75,7 +74,7 @@ class GraduationConsistencyTest extends IntegrationTestSupport {
 
         System.out.printf("[#59] 간단/상세 비교 %d건 중 불일치 %d건%n", compared, mismatches.size());
         mismatches.forEach(m -> System.out.println("    " + m));
-        assertThat(mismatches).hasSize(KNOWN_MISMATCHES);
+        assertThat(mismatches).isEmpty();
     }
 
     enum State {
@@ -88,18 +87,10 @@ class GraduationConsistencyTest extends IntegrationTestSupport {
     }
 
     /** 0학점 상태에서 상세 조회를 실행해 학점 관련 기준값을 읽어온다. */
-    private Map<String, Integer> requiredCredits(long studentId, String major) {
-        try {
-            return integratedService.checkGraduation(studentId, "테스터").getCheckList().stream()
-                    .filter(GraduationConsistencyTest::isCreditItem)
-                    .collect(Collectors.toMap(CheckItem::getCategory, i -> i.getRequired().intValue()));
-        } catch (IllegalArgumentException e) {
-            // 상세 조회가 지원하지 않는 전공 → 간단 조회 기준을 그대로 사용
-            SimpleGraduationResponse simple = simpleService.getSimpleStatus("user" + studentId);
-            return Map.of("총 이수학점", simple.getRequiredTotal(),
-                    "전공학점", simple.getMissingMajor(),
-                    "교양학점", simple.getMissingGeneral());
-        }
+    private Map<String, Integer> requiredCredits(long studentId) {
+        return integratedService.checkGraduation(studentId, "테스터").getCheckList().stream()
+                .filter(GraduationConsistencyTest::isCreditItem)
+                .collect(Collectors.toMap(CheckItem::getCategory, i -> i.getRequired().intValue()));
     }
 
     private void applyState(long studentId, Map<String, Integer> required, State state) {
@@ -142,6 +133,7 @@ class GraduationConsistencyTest extends IntegrationTestSupport {
     private String simpleVerdict(String loginId) {
         SimpleGraduationResponse response = simpleService.getSimpleStatus(loginId);
         boolean passed = response.getMissingMajor() == 0 && response.getMissingGeneral() == 0
+                && response.getExceededGeneral() == 0
                 && response.getCurrentTotal() >= response.getRequiredTotal();
         return passed ? "충족" : "미충족";
     }

@@ -1,0 +1,77 @@
+# 졸업 규칙 테이블
+# - 간단 조회(/api/graduation/simple)와 상세 조회(/api/graduation/my-status)가 모두 이 표를 사용합니다.
+# - 입학년도 구간은 from-year ~ to-year (양 끝 포함)
+graduation:
+
+  # [본부 공통] 교양 이수학점 (전공 무관)
+  general-credits:
+    - { from-year: 0,    to-year: 2017, min: 30, max: 999 }
+    - { from-year: 2018, to-year: 2022, min: 24, max: 42 }
+    - { from-year: 2023, to-year: 9999, min: 30, max: 999 }
+
+  # 전공·입학년도별 기준
+  rules:
+    # 심화컴퓨팅전공 (플랫폼SW융합전공도 같은 규칙 적용)
+    - { major: ADVANCED_COMPUTING, from-year: 0,    to-year: 2011, total-credits: 140, eng-score: 700,
+        abeek-general: 15, abeek-base-major: 18, abeek-engin-major: 60, abeek-total: 93,
+        course-groups: [ adv-common, msc-pre-2023 ] }
+    - { major: ADVANCED_COMPUTING, from-year: 2012, to-year: 2020, total-credits: 150, eng-score: 700,
+        abeek-general: 15, abeek-base-major: 21, abeek-engin-major: 75, abeek-total: 111,
+        course-groups: [ adv-common, msc-pre-2023 ] }
+    - { major: ADVANCED_COMPUTING, from-year: 2021, to-year: 2022, total-credits: 140, eng-score: 700,
+        abeek-general: 15, abeek-base-major: 18, abeek-engin-major: 60, abeek-total: 93,
+        course-groups: [ adv-common, msc-pre-2023 ] }
+    - { major: ADVANCED_COMPUTING, from-year: 2023, to-year: 9999, total-credits: 140, eng-score: 700,
+        abeek-general: 15, abeek-base-major: 18, abeek-engin-major: 60, abeek-total: 93,
+        course-groups: [ adv-common, msc-2023 ] }
+
+    # 글로벌SW융합전공 (영어·해외·창업 기준은 아래 gsw-tracks에서 트랙별로 적용)
+    - { major: GLOBAL_SW, from-year: 0, to-year: 9999, total-credits: 130, major-credits: 51, eng-score: 700,
+        course-groups: [ gsw-common ] }
+
+    # 인공지능컴퓨팅전공
+    - { major: AI_COMPUTING, from-year: 0, to-year: 9999, total-credits: 140, major-credits: 72, eng-score: 700,
+        course-groups: [ ai-common ] }
+
+  # 글로벌SW융합전공 세부 트랙별 기준
+  gsw-tracks:
+    - { track: MULTI_MAJOR,     eng-score: 700, overseas-credits: 9,  entre-lecture: 9 }
+    - { track: OVERSEAS_DEGREE, eng-score: 800, overseas-credits: 18, entre-lecture: 3 }
+    - { track: MASTER_LINK,     eng-score: 700, overseas-credits: 6,  entre-lecture: 0 }
+
+  # 필수 과목 묶음
+  course-groups:
+    # 공학전공 필수 (2012학번 이후 공통): 이론 7과목 + 설계 3과목
+    adv-common:
+      - { code: COMP0204, name: 프로그래밍기초 }
+      - { code: COME0331, name: 자료구조 }
+      - { code: COMP0217, name: 자바프로그래밍 }
+      - { code: ELEC0462, name: 시스템프로그래밍 }
+      - { code: COMP0411, name: 컴퓨터구조 }
+      - { code: COMP0312, name: 운영체제 }
+      - { code: COMP0319, name: 알고리즘1 }
+      - { code: COMP0205, name: 기초창의공학설계 }
+      - { code: ITEC0401, name: 종합설계프로젝트1 }
+      - { code: ITEC0402, name: 종합설계프로젝트2 }
+    # 전공기반(MSC) 2023학번부터
+    msc-2023:
+      - { code: CLTR0819, name: 기초수학2 }
+      - { code: COME0301, name: 이산수학 }
+    # 전공기반(MSC) ~2022학번 (수학1·물리학1 코드는 DB 확인 필요)
+    msc-pre-2023:
+      - { code: MATH1001, name: 수학1 }
+      - { code: PHYS1001, name: 물리학1 }
+      - { code: COME0301, name: 이산수학 }
+    gsw-common:
+      - { code: COMP0204, name: 프로그래밍기초 }
+      - { code: COME0331, name: 자료구조 }
+      - { code: COMP0312, name: 운영체제 }
+      - { code: GLSO0216, name: 알고리즘실습 }
+    ai-common:
+      - { code: COMP0453, name: 컴퓨팅사고와SW코딩 }
+      - { code: COMP0454, name: 인공지능수학기초 }
+      - { code: COME0331, name: 자료구조 }
+      - { code: COMP0319, name: 알고리즘1 }
+      - { code: COMP0324, name: 인공지능 }
+      - { code: ITEC0417, name: 기계학습개론 }
+      - { code: ITEC0401, name: 종합설계프로젝트1 }

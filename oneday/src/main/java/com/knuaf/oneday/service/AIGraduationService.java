@@ -1,8 +1,11 @@
 package com.knuaf.oneday.service;
 
 import com.knuaf.oneday.dto.GraduationCheckResponse;
+import com.knuaf.oneday.component.GraduationRules;
 import com.knuaf.oneday.dto.GraduationCheckResponse.CheckItem;
+import com.knuaf.oneday.dto.GraduationCheckResponse.CreditKind;
 import com.knuaf.oneday.dto.GraduationCriteria;
+import com.knuaf.oneday.entity.MajorCode;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.UserAttendRepository;
@@ -22,18 +25,7 @@ public class AIGraduationService {
 
     private final UserRepository userRepository;
     private final UserAttendRepository userAttendRepository;
-
-    // [인공지능컴퓨팅 필수 과목] (이미지 상단 내용 반영)
-    // ※ 과목코드는 학교 편람을 확인하여 정확한 코드로 매핑해주세요.
-    private static final Map<String, String> AI_REQUIRED_COURSES = new LinkedHashMap<>() {{
-        put("COMP0453", "컴퓨팅사고와SW코딩");
-        put("COMP0454", "인공지능수학기초");
-        put("COME0331", "자료구조");
-        put("COMP0319", "알고리즘1");
-        put("COMP0324", "인공지능");
-        put("ITEC0417", "기계학습개론");
-        put("ITEC0401", "종합설계프로젝트1");
-    }};
+    private final GraduationRules graduationRules;
 
     @Transactional(readOnly = true)
     public GraduationCheckResponse checkGraduation(Long studentId) {
@@ -46,7 +38,7 @@ public class AIGraduationService {
         int entryYear = (int) (studentId / 1000000);
 
         // 3. [핵심] 학번에 맞는 기준표 가져오기
-        GraduationCriteria criteria = getCriteriaByYear(entryYear);
+        GraduationCriteria criteria = graduationRules.criteria(MajorCode.AI_COMPUTING, entryYear);
 
         List<CheckItem> items = new ArrayList<>();
         boolean allPassed = true;
@@ -57,11 +49,11 @@ public class AIGraduationService {
 
         // 1. 총 이수학점 (140)
         int currentTotal = user.getTotal_credit() != null ? user.getTotal_credit().intValue() : 0;
-        if (!addCheckItem(items, "총 이수학점", currentTotal, criteria.getTotalCredits())) allPassed = false;
+        if (!addCheckItem(items, "총 이수학점", currentTotal, criteria.getTotalCredits(), CreditKind.TOTAL)) allPassed = false;
 
         // 2. 전공 이수학점 (72)
         int currentMajor = user.getMajor_credit() != null ? user.getMajor_credit().intValue() : 0;
-        if (!addCheckItem(items, "전공학점(AI)", currentMajor, criteria.getMajorCredits())) allPassed = false;
+        if (!addCheckItem(items, "전공학점(AI)", currentMajor, criteria.getMajorCredits(), CreditKind.MAJOR)) allPassed = false;
 
         // 3. 교양 이수학점 (학번별 Min ~ Max 체크)
         int currentGen = user.getGeneral_credit() != null ? user.getGeneral_credit().intValue() : 0;
@@ -74,6 +66,7 @@ public class AIGraduationService {
                 .required(criteria.getGeneralMin())
                 .isPassed(passGen)
                 .message(msgGen)
+                .kind(CreditKind.GENERAL)
                 .build());
         if (!passGen) allPassed = false;
 
@@ -133,35 +126,11 @@ public class AIGraduationService {
                 .build();
     }
 
-    // =========================================================
-    // ★ [핵심] 입학년도별 인공지능전공 기준표 생성
-    // =========================================================
-    private GraduationCriteria getCriteriaByYear(int year) {
-        // 연도별 교양 학점 기준
-        int genMin,genMax=999;
-        if(year<=2017){
-            genMin = 30;
-        }
-        else if(year<=2022){
-            genMin = 24;
-            genMax = 42;
-        }
-        else if(year<=2023){
-            genMin = 30;
-        }else{
-            genMin = 30;
-        }
-
-        return GraduationCriteria.builder()
-                .totalCredits(140)      // 총 140
-                .majorCredits(72)       // 전공 72 (인공지능 특화)
-                .generalMin(genMin).generalMax(genMax)
-                .engScore(700)          // 토익 700
-                .requiredCourses(AI_REQUIRED_COURSES) // 필수과목은 전학년 공통으로 보임
-                .build();
+    private boolean addCheckItem(List<CheckItem> items, String category, int current, int required) {
+        return addCheckItem(items, category, current, required, null);
     }
 
-    private boolean addCheckItem(List<CheckItem> items, String category, int current, int required) {
+    private boolean addCheckItem(List<CheckItem> items, String category, int current, int required, CreditKind kind) {
         boolean passed = current >= required;
         items.add(CheckItem.builder()
                 .category(category)
@@ -169,6 +138,7 @@ public class AIGraduationService {
                 .required(required)
                 .isPassed(passed)
                 .message(passed ? "통과" : (current - required) + " (부족)")
+                .kind(kind)
                 .build());
         return passed;
     }
