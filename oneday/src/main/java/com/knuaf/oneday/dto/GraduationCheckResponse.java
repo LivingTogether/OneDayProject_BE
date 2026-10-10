@@ -1,5 +1,6 @@
 package com.knuaf.oneday.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter; // ★ Setter 추가 (나중에 값을 끼워넣기 위해)
@@ -27,5 +28,15 @@ public class GraduationCheckResponse {
         private Number required;
         private boolean isPassed;
         private String message;
+
+        // 간단 조회가 상세 조회 결과를 요약할 때 쓰는 항목 분류 (API 응답에는 포함하지 않음)
+        @JsonIgnore
+        private CreditKind kind;
+    }
+
+    public enum CreditKind {
+        TOTAL,   // 총 이수학점
+        MAJOR,   // 전공(ABEEK 전공기반·공학전공 포함)
+        GENERAL  // 교양(ABEEK 기본소양 포함)
     }
 }

@@ -3,6 +3,7 @@ package com.knuaf.oneday.service;
 import com.knuaf.oneday.component.LectureTableNameProvider; // ★ 아까 만든 객체 import
 import com.knuaf.oneday.dto.LectureResponseDto;
 import com.knuaf.oneday.entity.Lecture;
+import com.knuaf.oneday.entity.MajorCode;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
@@ -102,7 +103,11 @@ public class LectureService {
     // ========================================================
     private List<String> getTargetLectureIds(String major, int grade, int term) {
         List<String> ids = new ArrayList<>();
-        if("심화컴퓨팅전공".equals(major) || "플랫폼SW융합전공".equals(major)) {
+        MajorCode majorCode = MajorCode.find(major).orElse(null);
+        if (majorCode == null) {
+            return ids;
+        }
+        if(majorCode.isAbeek()) {
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0045");
@@ -208,7 +213,7 @@ public class LectureService {
                 }
             }
         }
-        else if("글로벌SW융합전공".equals(major)){
+        else if(majorCode == MajorCode.GLOBAL_SW){
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0205");
@@ -300,7 +305,7 @@ public class LectureService {
                 }
             }
         }
-        else if("인공지능컴퓨팅전공".equals(major)){
+        else if(majorCode == MajorCode.AI_COMPUTING){
             if (grade == 1) {
                 if (term == 1) {  // [1학년 1학기 권장 과목 번호들]
                     ids.add("CLTR0205");

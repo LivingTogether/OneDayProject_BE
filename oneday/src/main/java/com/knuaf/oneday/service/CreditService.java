@@ -29,13 +29,13 @@ public class CreditService {
         List<UserAttend> allAttends = userAttendRepository.findAllByStudentId(studentId);
 
         // 3. 트랙별 계산
-        if ("심화컴퓨팅전공".equals(user.getMajor())||"플랫폼SW융합전공".equals(user.getMajor())) {
-            calculateForAdvComputing(user, allAttends);
-        } else if ("글로벌SW융합전공".equals(user.getMajor())) {
-            calculateForGlobSw(user, allAttends);
-        } else if("인공지능컴퓨팅전공".equals(user.getMajor())) {
-            calculateForAIComputing(user, allAttends);
-        }
+        MajorCode.find(user.getMajor()).ifPresent(major -> {
+            switch (major) {
+                case ADVANCED_COMPUTING, PLATFORM_SW -> calculateForAdvComputing(user, allAttends);
+                case GLOBAL_SW -> calculateForGlobSw(user, allAttends);
+                case AI_COMPUTING -> calculateForAIComputing(user, allAttends);
+            }
+        });
     }
     @Transactional(readOnly = true) // 조회만 하므로 읽기 전용 트랜잭션 권장
     public boolean isStartupCourse(String lectureId) {

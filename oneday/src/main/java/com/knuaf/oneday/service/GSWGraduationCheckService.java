@@ -1,9 +1,13 @@
 package com.knuaf.oneday.service;
 
 import com.knuaf.oneday.dto.GraduationCheckResponse;
+import com.knuaf.oneday.component.GraduationRules;
+import com.knuaf.oneday.configuration.GraduationRuleProperties.GswTrack;
 import com.knuaf.oneday.dto.GraduationCheckResponse.CheckItem;
+import com.knuaf.oneday.dto.GraduationCheckResponse.CreditKind;
 import com.knuaf.oneday.dto.GraduationCriteria;
 import com.knuaf.oneday.entity.GlobalSW;
+import com.knuaf.oneday.entity.MajorCode;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.GlobalSWRepository;
@@ -25,6 +29,7 @@ public class GSWGraduationCheckService {
     private final UserRepository userRepository;
     private final GlobalSWRepository globalSWRepository;
     private final UserAttendRepository userAttendRepository;
+    private final GraduationRules graduationRules;
 
     private enum Track {
         MULTI_MAJOR,       // 다중전공 트랙
@@ -32,23 +37,15 @@ public class GSWGraduationCheckService {
         MASTER_LINK        // 학석사연계 트랙
     }
 
-    // [전공 필수 과목] (이미지 3번 - 전공학점 주석 참조)
-    // 모든 학번/트랙 공통 적용
-    private static final Map<String, String> COMMON_REQUIRED_COURSES = new LinkedHashMap<>() {{
-        put("COMP0204", "프로그래밍기초");
-        put("COME0331", "자료구조");
-        put("COMP0312", "운영체제");
-        put("GLSO0216", "알고리즘실습");
-    }};
-
     @Transactional(readOnly = true)
     public GraduationCheckResponse checkGraduation(Long studentId) {
 
         // 1. 정보 조회
         User user = userRepository.findByStudentId(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("User 없음"));
+        // 아직 글로벌SW 이수 정보가 없으면 0학점으로 판정
         GlobalSW global = globalSWRepository.findByUser_StudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("GlobalSW 없음"));
+                .orElseGet(GlobalSW::new);
 
         // 2. 트랙 및 학번 파악
         String specificMajor = (user.getSpecific_major() == null) ? "" : user.getSpecific_major().trim();
@@ -56,7 +53,8 @@ public class GSWGraduationCheckService {
         int entryYear = (int) (studentId / 1000000);
 
         // 3. [핵심] 기준표(Criteria) 가져오기 (학번 + 트랙 조합)
-        GraduationCriteria criteria = getCriteriaByYearAndTrack(entryYear, track);
+        GraduationCriteria criteria = graduationRules.criteria(MajorCode.GLOBAL_SW, entryYear);
+        GswTrack trackRule = graduationRules.gswTrack(track.name());
 
         List<CheckItem> items = new ArrayList<>();
         boolean allPassed = true;
@@ -66,22 +64,22 @@ public class GSWGraduationCheckService {
         // ----------------------------------------------------
         // 1. 총 이수학점 (130)
         int currentTotal = user.getTotal_credit() != null ? user.getTotal_credit().intValue() : 0;
-        if (!addCheckItem(items, "[공통] 총 이수학점", currentTotal, criteria.getTotalCredits())) allPassed = false;
+        if (!addCheckItem(items, "[공통] 총 이수학점", currentTotal, criteria.getTotalCredits(), CreditKind.TOTAL)) allPassed = false;
 
         // 2. 전공 이수학점 (51)
         int currentMajor = user.getMajor_credit() != null ? user.getMajor_credit().intValue() : 0;
-        if (!addCheckItem(items, "[공통] SW전공학점", currentMajor, criteria.getMajorCredits())) allPassed = false;
+        if (!addCheckItem(items, "[공통] SW전공학점", currentMajor, criteria.getMajorCredits(), CreditKind.MAJOR)) allPassed = false;
 
         // 3. 교양학점 (학번별 범위 체크)
         int currentGen = user.getGeneral_credit() != null ? user.getGeneral_credit().intValue() : 0;
         boolean passGen = currentGen >= criteria.getGeneralMin() && currentGen <= criteria.getGeneralMax();
         String msgGen = passGen ? "통과" : (currentGen < criteria.getGeneralMin() ? (currentGen - criteria.getGeneralMin()) + " (부족)" : "초과");
-        items.add(CheckItem.builder().category("[공통] 교양학점").current(currentGen).required(criteria.getGeneralMin()).isPassed(passGen).message(msgGen).build());
+        items.add(CheckItem.builder().category("[공통] 교양학점").current(currentGen).required(criteria.getGeneralMin()).isPassed(passGen).message(msgGen).kind(CreditKind.GENERAL).build());
         if (!passGen) allPassed = false;
 
         // 4. 영어 성적 (트랙별 기준 적용)
         int currentEng = user.getEng_score() != null ? user.getEng_score().intValue() : 0;
-        if (!addCheckItem(items, "[트랙] 영어성적(토익)", currentEng, criteria.getEngScore())) allPassed = false;
+        if (!addCheckItem(items, "[트랙] 영어성적(토익)", currentEng, trackRule.getEngScore())) allPassed = false;
 
 
         // ----------------------------------------------------
@@ -96,13 +94,13 @@ public class GSWGraduationCheckService {
         int multiMajorCredits = global.getMultipleMajor() != null ? global.getMultipleMajor() : 0;
 
         // [A] 해외대학 인정학점
-        if (criteria.getOverseasCredits() > 0) {
-            if (!addCheckItem(items, "[트랙] 해외대학 인정학점", overseas, criteria.getOverseasCredits())) allPassed = false;
+        if (trackRule.getOverseasCredits() > 0) {
+            if (!addCheckItem(items, "[트랙] 해외대학 인정학점", overseas, trackRule.getOverseasCredits())) allPassed = false;
         }
 
         // [B] 창업교과목
-        if (criteria.getEntreLecture() > 0) {
-            if (!addCheckItem(items, "[트랙] 창업교과목", entre, criteria.getEntreLecture())) allPassed = false;
+        if (trackRule.getEntreLecture() > 0) {
+            if (!addCheckItem(items, "[트랙] 창업교과목", entre, trackRule.getEntreLecture())) allPassed = false;
         }
 /**
         // [C] 스타트업 창업 (다중전공 필수)
@@ -160,60 +158,6 @@ public class GSWGraduationCheckService {
                 .build();
     }
 
-    // =========================================================
-    // ★ [핵심] 학번과 트랙에 따른 기준표 생성
-    // =========================================================
-    private GraduationCriteria getCriteriaByYearAndTrack(int year, Track track) {
-
-        // 연도별 교양 학점 기준 다름
-        int genMin,genMax=999;
-        if(year<=2017){
-            genMin = 30;
-        }
-        else if(year<=2022){
-            genMin = 24;
-            genMax = 42;
-        }
-        else if(year<=2023){
-            genMin = 30;
-        }else{
-            genMin = 30;
-        }
-
-        // 2. 트랙별 기준 설정 (영어, 해외, 창업 등)
-        int eng = 700;
-        int overseas = 0;
-        int entre = 0;
-
-        switch (track) {
-            case MULTI_MAJOR: // 다중전공
-                eng = 700;
-                overseas = 9;
-                entre = 9;
-                break;
-            case OVERSEAS_DEGREE: // 해외복수학위
-                eng = 800; // 높음
-                overseas = 18; // '복수학위 or 교환학생 1년' -> 학점으로 환산(임의 18)하거나 별도 로직 필요
-                entre = 3;
-                break;
-            case MASTER_LINK: // 학석사연계
-                eng = 700;
-                overseas = 6;
-                entre = 0;
-                break;
-        }
-
-        return GraduationCriteria.builder()
-                .totalCredits(130)      // 공통 130
-                .majorCredits(51)       // 공통 51
-                .generalMin(genMin).generalMax(genMax)
-                .engScore(eng)
-                .overseasCredits(overseas)
-                .entreLecture(entre)
-                .requiredCourses(COMMON_REQUIRED_COURSES) // 모든 트랙 과목 동일
-                .build();
-    }
-
     private Track determineTrack(String specificMajor) {
         if (specificMajor.equals("해외복수학위")) return Track.OVERSEAS_DEGREE;
         if (specificMajor.equals("학석사연계")) return Track.MASTER_LINK;
@@ -226,8 +170,12 @@ public class GSWGraduationCheckService {
     }
 
     private boolean addCheckItem(List<CheckItem> items, String category, int current, int required) {
+        return addCheckItem(items, category, current, required, null);
+    }
+
+    private boolean addCheckItem(List<CheckItem> items, String category, int current, int required, CreditKind kind) {
         boolean passed = current >= required;
-        items.add(CheckItem.builder().category(category).current(current).required(required).isPassed(passed).message(passed ? "통과" : (current - required) + " (부족)").build());
+        items.add(CheckItem.builder().category(category).current(current).required(required).isPassed(passed).message(passed ? "통과" : (current - required) + " (부족)").kind(kind).build());
         return passed;
     }
 }

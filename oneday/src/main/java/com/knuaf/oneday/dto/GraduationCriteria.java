@@ -7,6 +7,7 @@ import java.util.Map;
 
 @Getter
 @Builder
+// graduation-rules.yml에서 전공·입학년도에 맞게 조합한 졸업 기준 (GraduationRules 참고)
 public class GraduationCriteria {
     // ------------------------------------------------
     // 1. [공통/본부] 졸업요건
@@ -26,13 +27,7 @@ public class GraduationCriteria {
     private int abeekTotal;        // [ABEEK] 인증 총점
 
     // ------------------------------------------------
-    // 3. [글로벌SW] 전용 요건 (★ 새로 추가된 부분)
-    // ------------------------------------------------
-    private int overseasCredits;   // 해외대학 인정학점 기준 (예: 9, 6, 0)
-    private int entreLecture;      // 창업교과목 이수학점 기준 (예: 9, 3, 0)
-
-    // ------------------------------------------------
-    // 4. 필수 과목 리스트 (Map<코드, 이름>)
+    // 3. 필수 과목 리스트 (Map<코드, 이름>)
     // ------------------------------------------------
     private Map<String, String> requiredCourses;
 }

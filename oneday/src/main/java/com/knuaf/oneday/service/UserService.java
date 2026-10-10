@@ -5,6 +5,7 @@ import com.knuaf.oneday.dto.MypageRequest;
 import com.knuaf.oneday.dto.UserUpdateDto;
 import com.knuaf.oneday.entity.Advcomp;
 import com.knuaf.oneday.entity.GlobalSW;
+import com.knuaf.oneday.entity.MajorCode;
 import com.knuaf.oneday.entity.User;
 import com.knuaf.oneday.entity.UserAttend;
 import com.knuaf.oneday.repository.AdvCompRepository;
@@ -38,17 +39,17 @@ public class UserService implements UserDetailsService {
 
     // 1. 회원가입
     public User register(SignupRequest request) {
+        MajorCode majorCode = MajorCode.from(request.getMajor()); // 알 수 없는 전공은 가입 불가
         User user = new User();
         user.setUserId(request.getUserId());
         // 반드시 암호화해서 저장!
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setStudentId(request.getStudentId());
         user.setName(request.getName());
-        user.setMajor(request.getMajor());
+        user.setMajor(majorCode.getDisplayName());
         User savedUser = userRepository.save(user);
 
-        String major = user.getMajor();
-        if(major.equals("심화컴퓨팅전공")||major.equals("플랫폼SW융합전공")) {
+        if(majorCode.isAbeek()) {
             Advcomp adv = new Advcomp();
             adv.setUser(savedUser);
 
@@ -59,7 +60,7 @@ public class UserService implements UserDetailsService {
 
             advcompRepository.save(adv);
         }
-        else if(major.equals("글로벌SW융합전공")) {
+        else if(majorCode == MajorCode.GLOBAL_SW) {
             GlobalSW gsw = new GlobalSW();
             gsw.setUser(savedUser);
 
