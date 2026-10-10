@@ -15,13 +15,14 @@ if not hasattr(paramiko, 'DSSKey'):
 # =========================================================
 # [설정] 서버, DB 정보
 # =========================================================
-SSH_HOST = 'ec2-16-176-198-162.ap-southeast-2.compute.amazonaws.com'
-SSH_USER = 'ubuntu'
-SSH_KEY_PATH = '/home/woong/IdeaProjects/OneDayProject_BE/oneday/postgresqlKey.pem'
+# 접속 정보는 환경변수로 주입합니다. (oneday/.env.example 참고)
+SSH_HOST = os.environ['SSH_HOST']
+SSH_USER = os.environ.get('SSH_USER', 'ubuntu')
+SSH_KEY_PATH = os.environ['SSH_KEY_PATH']
 
-DB_USER = 'yummy'
-DB_PASSWORD = 'yummy1234'
-DB_NAME = 'appdb'
+DB_USER = os.environ['DB_USER']
+DB_PASSWORD = os.environ['DB_PW']
+DB_NAME = os.environ.get('DB_NAME', 'appdb')
 TABLE_NAME = 'lecture_list'  # 테이블 이름 변경 (전체 히스토리이므로)
 
 # =========================================================
