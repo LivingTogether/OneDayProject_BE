@@ -15,6 +15,9 @@ java {
     }
 }
 
+// Docker Engine 29+는 최소 API 1.44를 요구하므로 Boot 3.2 기본값(1.19.x)보다 높은 버전 사용
+ext['testcontainers.version'] = '1.21.4'
+
 repositories {
     mavenCentral()
 }
@@ -42,6 +45,10 @@ dependencies {
     // 5. 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // 실제 PostgreSQL 컨테이너로 통합 테스트 (Docker 필요)
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:postgresql'
 
     // ★ [추가] PostConstruct 에러 해결용 (Java 9 이상 필수)
     implementation 'jakarta.annotation:jakarta.annotation-api:2.1.1'
