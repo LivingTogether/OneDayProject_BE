@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: 📘 API 문서 (Notion)
+    url: https://www.notion.so/API-28aaefd6245e80819a93e81d9744ba7c
+    about: API 명세는 노션 문서를 참고해주세요
