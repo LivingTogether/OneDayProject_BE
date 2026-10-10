@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.CourseRegisterDto;
 import com.knuaf.oneday.dto.CourseUpdateDto;
 import com.knuaf.oneday.dto.UserAttendResponseDto;
@@ -36,28 +38,19 @@ public class CourseService {
 
         // 쿼리 작성 (파라미터 이름을 :lecture로 통일)
         String sql = "SELECT * FROM " + tableName + " WHERE lec_id = :lecture";
-        System.out.println("4. 실행될 SQL: " + sql);
 
-        Lecture lecture = null;
+        Lecture lecture;
         try {
             lecture = (Lecture) em.createNativeQuery(sql, Lecture.class)
-                    // [중요] SQL의 :lecture 와 이름을 정확히 맞춰야 함
-                    // 만약 잘라낸 ID를 써야 한다면 request.getLecId() 대신 변수명(realLecId)을 넣으세요.
                     .setParameter("lecture", request.getLecId())
                     .getSingleResult();
-
         } catch (NoResultException e) {
             // DB에 데이터가 없을 때 발생하는 전용 에러
-            throw new IllegalArgumentException("해당 학기에 존재하지 않는 과목입니다. (ID: " + request.getLecId() + ")");
-
-        } catch (Exception e) {
-            // 문법 오류나 파라미터 바인딩 오류 등 기타 에러
-            System.err.println(">> [치명적 에러] SQL 실행 중 문제가 발생했습니다.");
-            e.printStackTrace(); // ★ 콘솔에 빨간색으로 상세 에러 로그를 출력함
-            throw new IllegalArgumentException("시스템 에러 발생: " + e.getMessage());
+            throw new BusinessException(ErrorCode.LECTURE_NOT_FOUND,
+                    "존재하지 않는 과목입니다. (ID: " + request.getLecId() + ")");
         }
         if (userAttendRepository.existsByStudentIdAndLecId(studentId, request.getLecId())) {
-            throw new IllegalArgumentException("이미 수강 신청한 과목입니다.");
+            throw new BusinessException(ErrorCode.COURSE_ALREADY_REGISTERED);
         }
 
         UserAttend newHistory = UserAttend.builder()
@@ -80,10 +73,10 @@ public class CourseService {
 
         // ★ 2. 조회할 때 자른 ID 사용
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, request.getLecId())
-                .orElseThrow(() -> new IllegalArgumentException("신청하지 않은 과목입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND, "신청하지 않은 과목입니다."));
 
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         userAttend.changeGrade(request.getReceivedGrade());
         userAttend.changeLecType(request.getLecType());
@@ -97,7 +90,7 @@ public class CourseService {
         lockUser(studentId);
 
         UserAttend userAttend = userAttendRepository.findByStudentIdAndLecId(studentId, rawLecId)
-                .orElseThrow(() -> new IllegalArgumentException("삭제할 수강 내역이 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.COURSE_NOT_FOUND, "삭제할 수강 내역이 없습니다."));
 
        userAttendRepository.delete(userAttend);
         creditService.recalculateTotalCredits(studentId);
@@ -107,7 +100,7 @@ public class CourseService {
     // 서로의 변경을 보지 못하고 합계를 덮어쓸 수 있다. 유저 행을 먼저 잠가 순서대로 처리한다. (#66)
     private void lockUser(Long studentId) {
         userRepository.findByStudentIdForUpdate(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 정보가 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
     private String parseLecId(String rawId) {

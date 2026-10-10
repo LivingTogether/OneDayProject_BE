@@ -1,5 +1,7 @@
 package com.knuaf.oneday.controller;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.GraduationCheckResponse;
 import com.knuaf.oneday.dto.SimpleGraduationResponse;
 import com.knuaf.oneday.entity.User;
@@ -28,13 +30,13 @@ public class GraduationController {
 
         // 1. 로그인한 사용자 아이디(userId) 가져오기
         if (userDetails == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
         String loginId = userDetails.getUsername(); // 시큐리티가 저장한 ID
 
         // 2. userId로 User 엔티티 찾기 -> studentId 획득
         User user = userRepository.findByUserId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         Long studentId = user.getStudentId();
         String userName = user.getName();
@@ -49,7 +51,7 @@ public class GraduationController {
             @AuthenticationPrincipal UserDetails userDetails) {
 
         if (userDetails == null) {
-            throw new IllegalArgumentException("로그인이 필요합니다.");
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
 
         return ResponseEntity.ok(simpleService.getSimpleStatus(userDetails.getUsername()));

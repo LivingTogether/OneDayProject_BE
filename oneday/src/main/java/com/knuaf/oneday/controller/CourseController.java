@@ -1,5 +1,7 @@
 package com.knuaf.oneday.controller;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.CourseRegisterDto;
 import com.knuaf.oneday.dto.CourseUpdateDto;
 import com.knuaf.oneday.dto.UserAttendResponseDto;
@@ -26,7 +28,7 @@ public class CourseController {
         String loginId = authentication.getName();
         // 2. DB에서 유저 정보 찾기
         User user = userRepository.findByUserId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 3. 유저 엔티티에 저장된 실제 학번(Long) 반환
         return user.getStudentId();
@@ -34,7 +36,7 @@ public class CourseController {
     private String getSpecific_major(Authentication authentication) {
         String loginId = authentication.getName();
         User user = userRepository.findByUserId(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 전공입니다."));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return user.getSpecific_major();
     }
 

@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.entity.*;
 import com.knuaf.oneday.repository.*;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +25,7 @@ public class CreditService {
     public void recalculateTotalCredits(Long studentId) {
         // 1. 유저 조회 (필요하다면 JOIN FETCH로 성능 최적화 가능)
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("유저 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 2. 수강 내역 전체 조회
         List<UserAttend> allAttends = userAttendRepository.findAllByStudentId(studentId);

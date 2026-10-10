@@ -1,5 +1,7 @@
 package com.knuaf.oneday.service;
 
+import com.knuaf.oneday.exception.BusinessException;
+import com.knuaf.oneday.exception.ErrorCode;
 import com.knuaf.oneday.dto.GraduationCheckResponse;
 import com.knuaf.oneday.component.GraduationRules;
 import com.knuaf.oneday.configuration.GraduationRuleProperties.GswTrack;
@@ -42,7 +44,7 @@ public class GSWGraduationCheckService {
 
         // 1. 정보 조회
         User user = userRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new IllegalArgumentException("User 없음"));
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         // 아직 글로벌SW 이수 정보가 없으면 0학점으로 판정
         GlobalSW global = globalSWRepository.findByUser_StudentId(studentId)
                 .orElseGet(GlobalSW::new);
